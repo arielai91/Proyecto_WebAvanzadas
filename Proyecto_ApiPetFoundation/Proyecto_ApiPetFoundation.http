@@ -1,6 +1,0 @@
-@Proyecto_ApiPetFoundation_HostAddress = http://localhost:5039
-
-GET {{Proyecto_ApiPetFoundation_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
