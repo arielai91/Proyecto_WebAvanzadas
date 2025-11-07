@@ -72,4 +72,10 @@ publish/**
 test-results/
 __pycache__/
 
+
+# Adicionales
+launchSettings.json
+appsettings.Development.json
+appsettings.Local.json
+
 # Keep appsettings tracked (don't ignore *.json globally) — appsettings.json likely intentionally committed
