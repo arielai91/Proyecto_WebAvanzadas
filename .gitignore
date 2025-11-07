@@ -1,7 +1,75 @@
+# Node / Angular
 node_modules/
-.vscode/
-.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp.*
+.cache/
+.angular/
+.angular/cache/
 dist/
+tmp/
+build/
+
+# Environment
 .env
+.env.local
+.env.*.local
+
+# Coverage
 coverage/
+.coverage
+coverage/lcov-report/
+
+# Editor directories and files
+.vscode/
 .idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+*.log
+logs/
+
+# Temporary / swap
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# ASP.NET / .NET
+## Build Folders
+**/bin/
+**/obj/
+
+## Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## NuGet
+*.nupkg
+packages/
+project.lock.json
+.nuget/
+
+## Publish / deploy
+publish/
+publish/**
+
+# Database files
+*.db
+*.sqlite
+
+# Misc
+*.vsix
+test-results/
+__pycache__/
+
+# Keep appsettings tracked (don't ignore *.json globally) — appsettings.json likely intentionally committed
