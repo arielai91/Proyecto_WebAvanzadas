@@ -15,6 +15,7 @@ namespace ApiPetFoundation.Infrastructure.Persistence.Contexts
         public DbSet<Pet> Pets { get; set; }
         public DbSet<PetImage> PetImages { get; set; }
         public DbSet<AdoptionRequest> AdoptionRequests { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         // ⚙️ Configuración de relaciones y restricciones
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -56,10 +57,21 @@ namespace ApiPetFoundation.Infrastructure.Persistence.Contexts
                 .HasForeignKey(ar => ar.DecisionById)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Índices únicos
+            // User → Notification (1:N)
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.User)
+                .WithMany(u => u.Notifications)
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Índices
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
+
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => n.UserId);
         }
+
     }
 }

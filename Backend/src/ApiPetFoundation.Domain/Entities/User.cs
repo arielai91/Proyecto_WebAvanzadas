@@ -14,5 +14,7 @@ namespace ApiPetFoundation.Domain.Entities
         // 🔗 Relaciones
         public ICollection<Pet>? PetsCreated { get; set; }   // Admin publica mascotas
         public ICollection<AdoptionRequest>? AdoptionRequests { get; set; } // Solicitudes enviadas
+
+        public ICollection<Notification>? Notifications { get; set; } // Notificaciones del usuario
     }
 }
