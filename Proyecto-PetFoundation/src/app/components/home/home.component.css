@@ -2,6 +2,32 @@
   box-sizing: border-box;
 }
 
+/* Notificación WebSocket */
+.websocket-notification {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  background: linear-gradient(135deg, #87CEEB 0%, #FFB6C1 100%);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(135, 206, 235, 0.4);
+  z-index: 9999;
+  animation: slideIn 0.3s ease-out;
+  font-weight: 600;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 /* Fondo con patrón de huellas */
 :host {
   display: block;

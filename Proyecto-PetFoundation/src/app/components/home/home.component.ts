@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../navbar/navbar.component';
+import { SignalrService } from '../../services/signalr.service';
+import { Subscription } from 'rxjs';
 
 interface Pet {
   id: number;
@@ -22,10 +24,14 @@ interface Pet {
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit, OnDestroy {
   searchTerm: string = '';
   selectedSpecies: string = 'all';
   selectedSize: string = 'all';
+  
+  private subscriptions: Subscription[] = [];
+  newPetNotification: string = '';
+  showNotification: boolean = false;
 
   allPets: Pet[] = [
     { 
@@ -95,6 +101,46 @@ export class HomeComponent {
       image: 'https://images.unsplash.com/photo-1505628346881-b72b27e84530?w=400'
     }
   ];
+
+  constructor(private signalrService: SignalrService) {}
+
+  ngOnInit() {
+    // Iniciar conexión WebSocket
+    this.signalrService.startConnection();
+
+    // Suscribirse a notificaciones de nuevas mascotas
+    const newPetSub = this.signalrService.newPetAvailable$.subscribe((petData) => {
+      console.log('🐾 Nueva mascota recibida:', petData);
+      this.showNewPetNotification(petData);
+      // Aquí puedes agregar la nueva mascota al array
+      // this.allPets.push(petData);
+    });
+
+    // Suscribirse a cambios de estado de adopción
+    const statusSub = this.signalrService.adoptionStatusChanged$.subscribe((statusData) => {
+      console.log('✅ Estado de adopción actualizado:', statusData);
+      // Aquí puedes mostrar una notificación al usuario
+    });
+
+    this.subscriptions.push(newPetSub, statusSub);
+  }
+
+  ngOnDestroy() {
+    // Limpiar suscripciones
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    // Cerrar conexión WebSocket
+    this.signalrService.stopConnection();
+  }
+
+  showNewPetNotification(petData: any) {
+    this.newPetNotification = `¡Nueva mascota disponible: ${petData.name}!`;
+    this.showNotification = true;
+    
+    // Ocultar notificación después de 5 segundos
+    setTimeout(() => {
+      this.showNotification = false;
+    }, 5000);
+  }
 
   get filteredPets(): Pet[] {
     return this.allPets.filter(pet => {

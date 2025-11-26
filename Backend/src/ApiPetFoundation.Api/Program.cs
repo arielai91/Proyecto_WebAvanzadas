@@ -5,6 +5,7 @@ using ApiPetFoundation.Application.DTOs.Pets;
 using Microsoft.AspNetCore.Identity;
 using ApiPetFoundation.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using ApiPetFoundation.Api.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,9 +25,12 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("http://localhost:4200")
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
+
+builder.Services.AddSignalR();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -93,5 +97,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 await app.RunAsync();
