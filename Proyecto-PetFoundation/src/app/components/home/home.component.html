@@ -1,0 +1,93 @@
+<app-navbar></app-navbar>
+
+<div class="container">
+  <header class="hero">
+    <h1>🐾 Encuentra a tu mejor amigo</h1>
+    <p class="subtitle">Dale una oportunidad a quien solo quiere amar. ¡Adopta, no compres!</p>
+  </header>
+
+  <!-- Búsqueda y Filtros -->
+  <section class="search-section">
+    <div class="search-bar">
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        placeholder="🔍 Buscar por nombre o raza..."
+        class="search-input"
+      />
+    </div>
+
+    <div class="filters">
+      <div class="filter-group">
+        <label>Especie:</label>
+        <select [(ngModel)]="selectedSpecies" class="filter-select">
+          <option value="all">Todas</option>
+          <option value="Perro">Perros</option>
+          <option value="Gato">Gatos</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Tamaño:</label>
+        <select [(ngModel)]="selectedSize" class="filter-select">
+          <option value="all">Todos</option>
+          <option value="Pequeño">Pequeño</option>
+          <option value="Mediano">Mediano</option>
+          <option value="Grande">Grande</option>
+        </select>
+      </div>
+
+      <button (click)="clearFilters()" class="btn-clear">Limpiar Filtros</button>
+    </div>
+  </section>
+
+  <!-- Resultados -->
+  <section class="results-section">
+    <h2>Mascotas Disponibles ({{ filteredPets.length }})</h2>
+    
+    @if (filteredPets.length === 0) {
+      <div class="no-results">
+        <p>🐾 No se encontraron mascotas con esos criterios</p>
+        <button (click)="clearFilters()" class="btn-primary">Ver todas las mascotas</button>
+      </div>
+    } @else {
+      <div class="pets-grid">
+        @for (pet of filteredPets; track pet.id) {
+          <div class="pet-card">
+            <div class="pet-image">
+              <img [src]="pet.image" [alt]="pet.name" />
+              <span class="pet-badge">{{ pet.species }}</span>
+            </div>
+            <div class="pet-content">
+              <h3>{{ pet.name }}</h3>
+              <div class="pet-info">
+                <span class="info-item">🐾 {{ pet.breed }}</span>
+                <span class="info-item">🎂 {{ pet.age }} años</span>
+              </div>
+              <div class="pet-info">
+                <span class="info-item">📊 {{ pet.size }}</span>
+                <span class="info-item">{{ pet.gender === 'Macho' ? '♂️' : '♀️' }} {{ pet.gender }}</span>
+              </div>
+              <p class="pet-description">{{ pet.description }}</p>
+              <div class="pet-actions">
+                <button class="btn-adopt">Adoptar</button>
+                <button class="btn-details">Ver más</button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- Sección de CTA -->
+  <section class="cta-section">
+    <h2>¿Quieres ayudar?</h2>
+    <p>Tu donación puede cambiar la vida de muchas mascotas</p>
+    <button class="btn-donate">Donar Ahora</button>
+  </section>
+</div>
+
+<footer class="footer">
+  <p>© 2025 Pet Foundation. Hecho con ❤️ para los animales.</p>
+</footer>

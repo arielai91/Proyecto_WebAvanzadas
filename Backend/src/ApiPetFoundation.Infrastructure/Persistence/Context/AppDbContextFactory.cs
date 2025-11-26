@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 
 namespace ApiPetFoundation.Infrastructure.Persistence.Contexts
 {
@@ -9,13 +10,8 @@ namespace ApiPetFoundation.Infrastructure.Persistence.Contexts
         {
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
 
-            var connectionString =
-            "Host=aws-1-us-east-2.pooler.supabase.com;" +
-            "Port=5432;" +
-            "Database=postgres;" +
-            "Username=postgres.gucoxlyyznglrfliwlze;" +
-            "Password=I8uTgfh4FWfi4Vld;" +
-            "Ssl Mode=Require;Trust Server Certificate=true;";
+            // Usar la cadena de conexión local
+            var connectionString = "Host=localhost;Port=5432;Database=petfoundationdb;Username=postgres;Password=postgreSQL2025";
 
             optionsBuilder.UseNpgsql(connectionString);
 
