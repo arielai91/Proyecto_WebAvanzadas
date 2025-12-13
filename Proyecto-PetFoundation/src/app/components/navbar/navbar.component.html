@@ -1,0 +1,22 @@
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="nav-brand">
+      <span class="logo">🐾</span>
+      <h2>Pet Foundation</h2>
+    </div>
+
+    <button class="menu-toggle" (click)="toggleMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <ul class="nav-menu" [class.active]="menuOpen">
+      <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Inicio</a></li>
+      <li><a routerLink="/adoptar" routerLinkActive="active">Adoptar</a></li>
+      <li><a routerLink="/donar" routerLinkActive="active">Donar</a></li>
+      <li><a routerLink="/contacto" routerLinkActive="active">Contacto</a></li>
+      <li><button class="btn-primary">Iniciar Sesión</button></li>
+    </ul>
+  </div>
+</nav>
