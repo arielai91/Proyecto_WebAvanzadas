@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using ApiPetFoundation.Application.Services;
+using ApiPetFoundation.Application.Interfaces.Services;
 
 namespace ApiPetFoundation.Application
 {
@@ -8,10 +9,11 @@ namespace ApiPetFoundation.Application
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             services.AddScoped<UserService>();
-            services.AddScoped<PetService>();
+            services.AddScoped<IUserProfileService, UserProfileService>();
+            services.AddScoped<IPetService, PetService>();
             services.AddScoped<PetImageService>();
-            services.AddScoped<AdoptionRequestService>();
-            services.AddScoped<NotificationService>();
+            services.AddScoped<IAdoptionRequestService, AdoptionRequestService>();
+            services.AddScoped<INotificationService, NotificationService>();
 
             return services;
         }

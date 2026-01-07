@@ -2,15 +2,16 @@ namespace ApiPetFoundation.Application.DTOs.Pets
 {
     public class PetResponse
     {
-        public required int Id { get; set; }
-        public required string Name { get; set; }
-        public required string Species { get; set; }
-        public string? Breed { get; set; }
-        public required int Age { get; set; }
-        public required string Sex { get; set; }
-        public required string Size { get; set; }
-        public required string Description { get; set; }
-        public required string Status { get; set; }
-        public string? CoverImageUrl { get; set; }  // Más adelante con Supabase
+        public required int Id { get; init; }
+        public required string Name { get; init; }
+        public required string Species { get; init; }
+        public string? Breed { get; init; }
+        public required int Age { get; init; }
+        public required string Sex { get; init; }
+        public required string Size { get; init; }
+        public required string Description { get; init; }
+        public required string Status { get; init; }
+        public string? CoverImageUrl { get; init; }  // Más adelante con Supabase
     }
 }
+

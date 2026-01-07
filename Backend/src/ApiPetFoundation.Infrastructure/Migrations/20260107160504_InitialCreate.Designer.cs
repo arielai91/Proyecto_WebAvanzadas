@@ -12,14 +12,15 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ApiPetFoundation.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251117052154_Initial")]
-    partial class Initial
+    [Migration("20260107160504_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("identity")
                 .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -64,7 +65,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AdoptionRequests");
+                    b.ToTable("AdoptionRequests", "app");
                 });
 
             modelBuilder.Entity("ApiPetFoundation.Domain.Entities.Notification", b =>
@@ -96,7 +97,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", "app");
                 });
 
             modelBuilder.Entity("ApiPetFoundation.Domain.Entities.Pet", b =>
@@ -150,7 +151,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
                     b.HasIndex("CreatedById");
 
-                    b.ToTable("Pets");
+                    b.ToTable("Pets", "app");
                 });
 
             modelBuilder.Entity("ApiPetFoundation.Domain.Entities.PetImage", b =>
@@ -178,7 +179,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
                     b.HasIndex("PetId");
 
-                    b.ToTable("PetImages");
+                    b.ToTable("PetImages", "app");
                 });
 
             modelBuilder.Entity("ApiPetFoundation.Domain.Entities.User", b =>
@@ -208,7 +209,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users", "app");
                 });
 
             modelBuilder.Entity("ApiPetFoundation.Infrastructure.Identity.AppIdentityUser", b =>
@@ -221,9 +222,6 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("text");
-
-                    b.Property<string>("DisplayName")
                         .HasColumnType("text");
 
                     b.Property<string>("Email")
@@ -256,9 +254,6 @@ namespace ApiPetFoundation.Infrastructure.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("PhotoUrl")
-                        .HasColumnType("text");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
@@ -278,7 +273,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
-                    b.ToTable("AspNetUsers", (string)null);
+                    b.ToTable("AspNetUsers", "identity");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -304,7 +299,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("RoleNameIndex");
 
-                    b.ToTable("AspNetRoles", (string)null);
+                    b.ToTable("AspNetRoles", "identity");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -329,7 +324,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetRoleClaims", (string)null);
+                    b.ToTable("AspNetRoleClaims", "identity");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -354,7 +349,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserClaims", (string)null);
+                    b.ToTable("AspNetUserClaims", "identity");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -376,7 +371,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserLogins", (string)null);
+                    b.ToTable("AspNetUserLogins", "identity");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -391,7 +386,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetUserRoles", (string)null);
+                    b.ToTable("AspNetUserRoles", "identity");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -410,7 +405,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("AspNetUserTokens", (string)null);
+                    b.ToTable("AspNetUserTokens", "identity");
                 });
 
             modelBuilder.Entity("ApiPetFoundation.Domain.Entities.AdoptionRequest", b =>

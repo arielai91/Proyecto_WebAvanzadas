@@ -1,9 +1,12 @@
 using ApiPetFoundation.Application.Interfaces.Repositories;
 using ApiPetFoundation.Domain.Entities;
 using ApiPetFoundation.Application.DTOs.Pets;
+using ApiPetFoundation.Application.Interfaces.Services;
+using ApiPetFoundation.Domain.Constants;
+using ApiPetFoundation.Application.DTOs.Common;
 namespace ApiPetFoundation.Application.Services
 {
-    public class PetService
+    public class PetService : IPetService
     {
         private readonly IPetRepository _petRepository;
 
@@ -15,39 +18,35 @@ namespace ApiPetFoundation.Application.Services
         // Convert DTO -> Entity
         public Pet CreatePetFromDto(CreatePetRequest dto, int userId)
         {
-            return new Pet
-            {
-                Name = dto.Name,
-                Species = dto.Species,
-                Breed = dto.Breed,
-                Age = dto.Age,
-                Sex = dto.Sex,
-                Size = dto.Size,
-                Description = dto.Description,
-                Status = "Available",
-                CreatedById = userId,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
+            return Pet.Create(
+                dto.Name,
+                dto.Species,
+                dto.Breed,
+                dto.Age,
+                dto.Sex,
+                dto.Size,
+                dto.Description,
+                userId);
         }
 
         // Update entity from DTO
         public void UpdatePetFromDto(Pet pet, UpdatePetRequest dto)
         {
-            pet.Name = dto.Name;
-            pet.Species = dto.Species;
-            pet.Breed = dto.Breed;
-            pet.Age = dto.Age;
-            pet.Sex = dto.Sex;
-            pet.Size = dto.Size;
-            pet.Description = dto.Description;
-            pet.Status = dto.Status;
-            pet.UpdatedAt = DateTime.UtcNow;
+            pet.UpdateDetails(
+                dto.Name,
+                dto.Species,
+                dto.Breed,
+                dto.Age,
+                dto.Sex,
+                dto.Size,
+                dto.Description,
+                dto.Status);
         }
 
         // Convert Entity -> Response DTO (para Swagger)
         public PetResponse MapToResponse(Pet pet)
         {
+            var coverImageUrl = pet.Images?.FirstOrDefault(i => i.IsCover)?.Url;
             return new PetResponse
             {
                 Id = pet.Id,
@@ -59,13 +58,63 @@ namespace ApiPetFoundation.Application.Services
                 Size = pet.Size,
                 Description = pet.Description,
                 Status = pet.Status,
-                CoverImageUrl = null // lo agregaremos con Supabase
+                CoverImageUrl = coverImageUrl
+            };
+        }
+
+        public PetResponseDetails MapToDetailsResponse(Pet pet)
+        {
+            var coverImageUrl = pet.Images?.FirstOrDefault(i => i.IsCover)?.Url;
+            return new PetResponseDetails
+            {
+                Id = pet.Id,
+                Name = pet.Name,
+                Species = pet.Species,
+                Breed = pet.Breed,
+                Age = pet.Age,
+                Sex = pet.Sex,
+                Size = pet.Size,
+                Description = pet.Description,
+                Status = pet.Status,
+                CreatedById = pet.CreatedById,
+                CoverImageUrl = coverImageUrl ?? string.Empty,
+                CreatedAt = pet.CreatedAt,
+                UpdatedAt = pet.UpdatedAt
             };
         }
 
         public async Task<IEnumerable<Pet>> GetAllPetsAsync()
         {
             return await _petRepository.GetAllAsync();
+        }
+
+        public async Task<PagedResult<Pet>> GetPagedAsync(
+            int page,
+            int pageSize,
+            string? status,
+            string? species,
+            string? size,
+            string? sex,
+            int? createdById,
+            int? minAge,
+            int? maxAge,
+            string? search,
+            DateTime? createdFrom,
+            DateTime? createdTo)
+        {
+            return await _petRepository.GetPagedAsync(
+                page,
+                pageSize,
+                status,
+                species,
+                size,
+                sex,
+                createdById,
+                minAge,
+                maxAge,
+                search,
+                createdFrom,
+                createdTo);
         }
 
         public async Task<Pet?> GetPetByIdAsync(int id)

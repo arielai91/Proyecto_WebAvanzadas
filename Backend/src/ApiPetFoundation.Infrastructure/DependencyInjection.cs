@@ -6,6 +6,9 @@ using ApiPetFoundation.Application.Interfaces.Repositories;
 using ApiPetFoundation.Infrastructure.Repositories;
 using ApiPetFoundation.Application.Interfaces.Services;
 using ApiPetFoundation.Infrastructure.Identity;
+using ApiPetFoundation.Infrastructure.Configuration;
+using ApiPetFoundation.Infrastructure.Events;
+using ApiPetFoundation.Infrastructure.Storage;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -55,6 +58,12 @@ namespace ApiPetFoundation.Infrastructure
 
             // 4. Registrar AuthService
             services.AddScoped<IAuthService, AuthService>();
+
+            services.Configure<RabbitMqSettings>(configuration.GetSection("RabbitMq"));
+            services.AddSingleton<IEventPublisher, RabbitMqEventPublisher>();
+
+            services.Configure<SupabaseSettings>(configuration.GetSection("Supabase"));
+            services.AddHttpClient<IStorageService, SupabaseStorageService>();
 
             // Registrar repositorios
             services.AddScoped<IPetRepository, PetRepository>();

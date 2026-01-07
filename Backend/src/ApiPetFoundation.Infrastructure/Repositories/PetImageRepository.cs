@@ -30,6 +30,11 @@ namespace ApiPetFoundation.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task<List<PetImage>> GetByPetIdAsync(int petId)
+        {
+            return await _context.PetImages.Where(pi => pi.PetId == petId).ToListAsync();
+        }
+
         public async Task UpdateAsync(PetImage entity)
         {
             _context.PetImages.Update(entity);

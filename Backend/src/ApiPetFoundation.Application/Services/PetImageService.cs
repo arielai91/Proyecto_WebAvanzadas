@@ -6,10 +6,12 @@ namespace ApiPetFoundation.Application.Services
     public class PetImageService
     {
         private readonly IPetImageRepository _petImageRepository;
+        private readonly IPetRepository _petRepository;
 
-        public PetImageService(IPetImageRepository petImageRepository)
+        public PetImageService(IPetImageRepository petImageRepository, IPetRepository petRepository)
         {
             _petImageRepository = petImageRepository;
+            _petRepository = petRepository;
         }
 
         public async Task<IEnumerable<PetImage>> GetAllPetImagesAsync()
@@ -35,6 +37,25 @@ namespace ApiPetFoundation.Application.Services
         public async Task DeletePetImageAsync(PetImage petImage)
         {
             await _petImageRepository.DeleteAsync(petImage);
+        }
+
+        public async Task<PetImage> SetCoverImageAsync(int petId, string imageUrl)
+        {
+            var pet = await _petRepository.GetByIdAsync(petId);
+            if (pet == null)
+                throw new InvalidOperationException("Pet not found.");
+
+            var existingImages = await _petImageRepository.GetByPetIdAsync(petId);
+            foreach (var image in existingImages.Where(i => i.IsCover))
+            {
+                image.SetCover(false);
+                await _petImageRepository.UpdateAsync(image);
+            }
+
+            var newImage = PetImage.Create(petId, imageUrl, true);
+
+            await _petImageRepository.AddAsync(newImage);
+            return newImage;
         }
     }
 }

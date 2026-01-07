@@ -7,13 +7,20 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ApiPetFoundation.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(
+                name: "app");
+
+            migrationBuilder.EnsureSchema(
+                name: "identity");
+
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
@@ -28,11 +35,10 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetUsers",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
-                    DisplayName = table.Column<string>(type: "text", nullable: true),
-                    PhotoUrl = table.Column<string>(type: "text", nullable: true),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -55,6 +61,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Users",
+                schema: "app",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -72,6 +79,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -86,6 +94,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
                         column: x => x.RoleId,
+                        principalSchema: "identity",
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -93,6 +102,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetUserClaims",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -107,6 +117,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_AspNetUserClaims_AspNetUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "identity",
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -114,6 +125,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetUserLogins",
+                schema: "identity",
                 columns: table => new
                 {
                     LoginProvider = table.Column<string>(type: "text", nullable: false),
@@ -127,6 +139,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_AspNetUserLogins_AspNetUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "identity",
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -134,6 +147,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetUserRoles",
+                schema: "identity",
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "text", nullable: false),
@@ -145,12 +159,14 @@ namespace ApiPetFoundation.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
                         column: x => x.RoleId,
+                        principalSchema: "identity",
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_AspNetUserRoles_AspNetUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "identity",
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -158,6 +174,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetUserTokens",
+                schema: "identity",
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "text", nullable: false),
@@ -171,6 +188,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_AspNetUserTokens_AspNetUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "identity",
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -178,6 +196,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Notifications",
+                schema: "app",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -194,6 +213,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_Notifications_Users_UserId",
                         column: x => x.UserId,
+                        principalSchema: "app",
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -201,6 +221,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Pets",
+                schema: "app",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -223,6 +244,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_Pets_Users_CreatedById",
                         column: x => x.CreatedById,
+                        principalSchema: "app",
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -230,6 +252,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AdoptionRequests",
+                schema: "app",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -248,18 +271,21 @@ namespace ApiPetFoundation.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_AdoptionRequests_Pets_PetId",
                         column: x => x.PetId,
+                        principalSchema: "app",
                         principalTable: "Pets",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_AdoptionRequests_Users_DecisionById",
                         column: x => x.DecisionById,
+                        principalSchema: "app",
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_AdoptionRequests_Users_UserId",
                         column: x => x.UserId,
+                        principalSchema: "app",
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -267,6 +293,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "PetImages",
+                schema: "app",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -282,6 +309,7 @@ namespace ApiPetFoundation.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_PetImages_Pets_PetId",
                         column: x => x.PetId,
+                        principalSchema: "app",
                         principalTable: "Pets",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -289,68 +317,81 @@ namespace ApiPetFoundation.Infrastructure.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_AdoptionRequests_DecisionById",
+                schema: "app",
                 table: "AdoptionRequests",
                 column: "DecisionById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AdoptionRequests_PetId",
+                schema: "app",
                 table: "AdoptionRequests",
                 column: "PetId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AdoptionRequests_UserId",
+                schema: "app",
                 table: "AdoptionRequests",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
+                schema: "identity",
                 table: "AspNetRoleClaims",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "RoleNameIndex",
+                schema: "identity",
                 table: "AspNetRoles",
                 column: "NormalizedName",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
+                schema: "identity",
                 table: "AspNetUserClaims",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserLogins_UserId",
+                schema: "identity",
                 table: "AspNetUserLogins",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserRoles_RoleId",
+                schema: "identity",
                 table: "AspNetUserRoles",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "EmailIndex",
+                schema: "identity",
                 table: "AspNetUsers",
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
+                schema: "identity",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Notifications_UserId",
+                schema: "app",
                 table: "Notifications",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PetImages_PetId",
+                schema: "app",
                 table: "PetImages",
                 column: "PetId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Pets_CreatedById",
+                schema: "app",
                 table: "Pets",
                 column: "CreatedById");
         }
@@ -359,40 +400,52 @@ namespace ApiPetFoundation.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AdoptionRequests");
+                name: "AdoptionRequests",
+                schema: "app");
 
             migrationBuilder.DropTable(
-                name: "AspNetRoleClaims");
+                name: "AspNetRoleClaims",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "AspNetUserClaims");
+                name: "AspNetUserClaims",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "AspNetUserLogins");
+                name: "AspNetUserLogins",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "AspNetUserRoles");
+                name: "AspNetUserRoles",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "AspNetUserTokens");
+                name: "AspNetUserTokens",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "Notifications");
+                name: "Notifications",
+                schema: "app");
 
             migrationBuilder.DropTable(
-                name: "PetImages");
+                name: "PetImages",
+                schema: "app");
 
             migrationBuilder.DropTable(
-                name: "AspNetRoles");
+                name: "AspNetRoles",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "AspNetUsers",
+                schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "Pets");
+                name: "Pets",
+                schema: "app");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Users",
+                schema: "app");
         }
     }
 }

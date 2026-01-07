@@ -1,6 +1,5 @@
 using ApiPetFoundation.Application.DTOs.Pets;
-using ApiPetFoundation.Application.Services;
-using ApiPetFoundation.Domain.Entities;
+using ApiPetFoundation.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiPetFoundation.Api.Controllers
@@ -9,19 +8,56 @@ namespace ApiPetFoundation.Api.Controllers
     [Route("api/[controller]")]
     public class PetsController : ControllerBase
     {
-        private readonly PetService _petService;
+        private readonly IPetService _petService;
+        private readonly IEventPublisher _eventPublisher;
 
-        public PetsController(PetService petService)
+        public PetsController(IPetService petService, IEventPublisher eventPublisher)
         {
             _petService = petService;
+            _eventPublisher = eventPublisher;
         }
 
         // GET: api/pets
         [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var pets = await _petService.GetAllPetsAsync();
-            var response = pets.Select(_petService.MapToResponse);
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] string? status = null,
+        [FromQuery] string? species = null,
+        [FromQuery] string? size = null,
+        [FromQuery] string? sex = null,
+        [FromQuery] int? createdById = null,
+        [FromQuery] int? minAge = null,
+        [FromQuery] int? maxAge = null,
+        [FromQuery] string? search = null,
+        [FromQuery] DateTime? createdFrom = null,
+        [FromQuery] DateTime? createdTo = null)
+    {
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 20;
+
+            var pets = await _petService.GetPagedAsync(
+                page,
+                pageSize,
+                status,
+                species,
+                size,
+                sex,
+                createdById,
+                minAge,
+                maxAge,
+                search,
+                createdFrom,
+                createdTo);
+
+            var response = new
+            {
+                pets.TotalCount,
+                pets.Page,
+                pets.PageSize,
+                Items = pets.Items.Select(_petService.MapToDetailsResponse)
+            };
+
             return Ok(response);
         }
 
@@ -46,6 +82,8 @@ namespace ApiPetFoundation.Api.Controllers
             await _petService.AddPetAsync(pet);
 
             var response = _petService.MapToResponse(pet);
+
+            await _eventPublisher.PublishAsync("PetCreated", new { Pet = response });
 
             return CreatedAtAction(nameof(GetById), new { id = pet.Id }, response);
         }

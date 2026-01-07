@@ -24,6 +24,11 @@ namespace ApiPetFoundation.Infrastructure.Repositories
             return await _context.UsersDomain.FirstOrDefaultAsync(u => u.Id == id);
         }
 
+        public async Task<User?> GetByIdentityUserIdAsync(string identityUserId)
+        {
+            return await _context.UsersDomain.FirstOrDefaultAsync(u => u.IdentityUserId == identityUserId);
+        }
+
         public async Task AddAsync(User entity)
         {
             await _context.UsersDomain.AddAsync(entity);

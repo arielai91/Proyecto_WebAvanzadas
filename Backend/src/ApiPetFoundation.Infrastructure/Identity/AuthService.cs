@@ -2,7 +2,6 @@ using ApiPetFoundation.Application.DTOs.Auth;
 using ApiPetFoundation.Application.Interfaces.Services;
 using ApiPetFoundation.Application.Exceptions;
 using ApiPetFoundation.Domain.Entities;
-using ApiPetFoundation.Infrastructure.Persistence.Contexts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -17,18 +16,18 @@ namespace ApiPetFoundation.Infrastructure.Identity
         private readonly UserManager<AppIdentityUser> _userManager;
         private readonly SignInManager<AppIdentityUser> _signInManager;
         private readonly IConfiguration _config;
-        private readonly AppDbContext _dbContext;
+        private readonly IUserProfileService _userProfileService;
 
         public AuthService(
             UserManager<AppIdentityUser> userManager,
             SignInManager<AppIdentityUser> signInManager,
             IConfiguration config,
-            AppDbContext dbContext)
+            IUserProfileService userProfileService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _config = config;
-            _dbContext = dbContext;
+            _userProfileService = userProfileService;
         }
 
         public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
@@ -37,8 +36,7 @@ namespace ApiPetFoundation.Infrastructure.Identity
             var identityUser = new AppIdentityUser
             {
                 UserName = request.Email,
-                Email = request.Email,
-                DisplayName = request.Name
+                Email = request.Email
             };
 
             var result = await _userManager.CreateAsync(identityUser, request.Password);
@@ -50,16 +48,9 @@ namespace ApiPetFoundation.Infrastructure.Identity
             await _userManager.AddToRoleAsync(identityUser, "User");
 
             // 2. Crear user del dominio (perfil)
-            var userDomain = new User
-            {
-                IdentityUserId = identityUser.Id,
-                Name = request.Name,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
+            var userDomain = User.Create(identityUser.Id, request.Name);
 
-            _dbContext.UsersDomain.Add(userDomain);
-            await _dbContext.SaveChangesAsync();
+            await _userProfileService.CreateProfileAsync(userDomain);
 
             // 3. Generar token
             return await GenerateTokenResponse(identityUser);
@@ -82,6 +73,9 @@ namespace ApiPetFoundation.Infrastructure.Identity
 
         private async Task<AuthResponse> GenerateTokenResponse(AppIdentityUser user)
         {
+            var domainUser = await _userProfileService.GetByIdentityUserIdAsync(user.Id);
+            var displayName = domainUser?.Name ?? user.UserName ?? user.Email ?? string.Empty;
+
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -92,8 +86,13 @@ namespace ApiPetFoundation.Infrastructure.Identity
             {
                     new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                     new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-                    new Claim("name", user.DisplayName ?? "")
+                    new Claim("name", displayName)
             };
+
+            if (domainUser != null)
+            {
+                claims.Add(new Claim("domain_user_id", domainUser.Id.ToString()));
+            }
 
             // Agregar roles al JWT
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
@@ -110,7 +109,7 @@ namespace ApiPetFoundation.Infrastructure.Identity
             {
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 Email = user.Email!,
-                Name = user.DisplayName ?? "",
+                Name = displayName,
                 Roles = roles.ToList()
             };
         }

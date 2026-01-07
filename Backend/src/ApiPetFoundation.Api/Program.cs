@@ -2,12 +2,13 @@ using ApiPetFoundation.Application;
 using ApiPetFoundation.Infrastructure;
 using FluentValidation;
 using ApiPetFoundation.Application.DTOs.Pets;
+using ApiPetFoundation.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
 using ApiPetFoundation.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using ApiPetFoundation.Api.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.UseUrls("https://localhost:5001");
 
 
 builder.Services.AddApplication();
@@ -30,10 +31,9 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddSignalR();
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHealthChecks();
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -80,6 +80,10 @@ using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     await IdentitySeed.SeedRoles(roleManager);
+
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppIdentityUser>>();
+    var userProfileService = scope.ServiceProvider.GetRequiredService<IUserProfileService>();
+    await SeedUsers(userManager, userProfileService, builder.Configuration);
 }
 
 
@@ -97,6 +101,63 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHub<NotificationHub>("/hubs/notifications");
+app.MapHealthChecks("/health");
 
 await app.RunAsync();
+
+static async Task SeedUsers(
+    UserManager<AppIdentityUser> userManager,
+    IUserProfileService userProfileService,
+    IConfiguration configuration)
+{
+    await SeedUserAsync(
+        userManager,
+        userProfileService,
+        configuration["Seed:AdminEmail"],
+        configuration["Seed:AdminPassword"],
+        configuration["Seed:AdminName"] ?? "Admin",
+        "Admin");
+
+    await SeedUserAsync(
+        userManager,
+        userProfileService,
+        configuration["Seed:UserEmail"],
+        configuration["Seed:UserPassword"],
+        configuration["Seed:UserName"] ?? "User",
+        "User");
+}
+
+static async Task SeedUserAsync(
+    UserManager<AppIdentityUser> userManager,
+    IUserProfileService userProfileService,
+    string? email,
+    string? password,
+    string name,
+    string role)
+{
+    if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        return;
+
+    var identityUser = await userManager.FindByEmailAsync(email);
+    if (identityUser == null)
+    {
+        identityUser = new AppIdentityUser
+        {
+            UserName = email,
+            Email = email
+        };
+
+        var createResult = await userManager.CreateAsync(identityUser, password);
+        if (!createResult.Succeeded)
+            return;
+    }
+
+    if (!await userManager.IsInRoleAsync(identityUser, role))
+        await userManager.AddToRoleAsync(identityUser, role);
+
+    var domainUser = await userProfileService.GetByIdentityUserIdAsync(identityUser.Id);
+    if (domainUser == null)
+    {
+        await userProfileService.CreateProfileAsync(ApiPetFoundation.Domain.Entities.User.Create(identityUser.Id, name));
+    }
+}

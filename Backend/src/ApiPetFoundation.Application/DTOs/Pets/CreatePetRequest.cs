@@ -2,12 +2,13 @@ namespace ApiPetFoundation.Application.DTOs.Pets
 {
     public class CreatePetRequest
     {
-        public required string Name { get; set; }
-        public required string Species { get; set; }
-        public required string Breed { get; set; }
-        public required int Age { get; set; }
-        public required string Sex { get; set; }
-        public required string Size { get; set; }
-        public required string Description { get; set; }
+        public required string Name { get; init; }
+        public required string Species { get; init; }
+        public required string Breed { get; init; }
+        public required int Age { get; init; }
+        public required string Sex { get; init; }
+        public required string Size { get; init; }
+        public required string Description { get; init; }
     }
 }
+

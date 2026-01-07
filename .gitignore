@@ -81,3 +81,5 @@ appsettings.Local.json
 # Keep appsettings tracked (don't ignore *.json globally) — appsettings.json likely intentionally committed
 # Snyk Security Extension - AI Rules (auto-generated)
 .github/instructions/snyk_rules.instructions.md
+Backend/README.md
+Backend/BUILD.md
