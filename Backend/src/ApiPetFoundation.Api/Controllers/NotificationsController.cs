@@ -1,3 +1,4 @@
+using System.Linq;
 using ApiPetFoundation.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -35,8 +36,20 @@ namespace ApiPetFoundation.Api.Controllers
             if (userId == null)
                 return Unauthorized();
 
-            if (page < 1) page = 1;
-            if (pageSize < 1) pageSize = 20;
+            if (page < 1)
+                return BadRequest(new { error = "Page must be greater than 0." });
+
+            if (pageSize < 1 || pageSize > 100)
+                return BadRequest(new { error = "PageSize must be between 1 and 100." });
+
+            if (!string.IsNullOrWhiteSpace(type) && type.Length > 50)
+                return BadRequest(new { error = "Type filter is too long." });
+
+            if (!string.IsNullOrWhiteSpace(type) && ContainsControlChars(type))
+                return BadRequest(new { error = "Type filter contains invalid characters." });
+
+            if (createdFrom.HasValue && createdTo.HasValue && createdFrom.Value > createdTo.Value)
+                return BadRequest(new { error = "createdFrom cannot be greater than createdTo." });
 
             var notifications = await _notificationService.GetPagedAsync(
                 userId.Value,
@@ -74,6 +87,9 @@ namespace ApiPetFoundation.Api.Controllers
         [Authorize]
         public async Task<IActionResult> MarkAsRead(int id)
         {
+            if (id <= 0)
+                return BadRequest(new { error = "Id must be greater than 0." });
+
             var userId = await GetDomainUserIdAsync();
             if (userId == null)
                 return Unauthorized();
@@ -109,6 +125,11 @@ namespace ApiPetFoundation.Api.Controllers
 
             var user = await _userProfileService.GetByIdentityUserIdAsync(identityUserId);
             return user?.Id;
+        }
+
+        private static bool ContainsControlChars(string value)
+        {
+            return value.Any(ch => char.IsControl(ch));
         }
     }
 }

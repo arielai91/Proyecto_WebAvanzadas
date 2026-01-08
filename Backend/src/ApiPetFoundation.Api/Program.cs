@@ -1,6 +1,7 @@
 using ApiPetFoundation.Application;
 using ApiPetFoundation.Infrastructure;
 using FluentValidation;
+using FluentValidation.AspNetCore;
 using ApiPetFoundation.Application.DTOs.Pets;
 using ApiPetFoundation.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
@@ -73,6 +74,7 @@ builder.Services.AddSwaggerGen(c =>
 
 
 builder.Services.AddValidatorsFromAssembly(typeof(CreatePetRequest).Assembly);
+builder.Services.AddFluentValidationAutoValidation();
 
 var app = builder.Build();
 

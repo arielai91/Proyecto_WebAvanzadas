@@ -1,6 +1,7 @@
 using ApiPetFoundation.Application.DTOs.AdoptionRequests;
 using ApiPetFoundation.Application.Exceptions;
 using ApiPetFoundation.Application.Interfaces.Services;
+using ApiPetFoundation.Domain.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
@@ -38,8 +39,21 @@ public class AdoptionRequestsController : ControllerBase
         [FromQuery] DateTime? createdFrom = null,
         [FromQuery] DateTime? createdTo = null)
     {
-        if (page < 1) page = 1;
-        if (pageSize < 1) pageSize = 20;
+        if (page < 1)
+            return BadRequest(new { error = "Page must be greater than 0." });
+
+        if (pageSize < 1 || pageSize > 100)
+            return BadRequest(new { error = "PageSize must be between 1 and 100." });
+
+        if (!string.IsNullOrWhiteSpace(status)
+            && status != AdoptionRequestStatuses.Pending
+            && status != AdoptionRequestStatuses.Approved
+            && status != AdoptionRequestStatuses.Rejected
+            && status != AdoptionRequestStatuses.Cancelled)
+            return BadRequest(new { error = "Invalid status filter." });
+
+        if (createdFrom.HasValue && createdTo.HasValue && createdFrom.Value > createdTo.Value)
+            return BadRequest(new { error = "createdFrom cannot be greater than createdTo." });
 
         var requests = await _adoptionRequestService.GetPagedWithDetailsAsync(
             page,
@@ -65,6 +79,9 @@ public class AdoptionRequestsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
+        if (id <= 0)
+            return BadRequest(new { error = "Id must be greater than 0." });
+
         var request = await _adoptionRequestService.GetAdoptionRequestByIdAsync(id);
         if (request == null)
             return NotFound();
@@ -99,6 +116,9 @@ public class AdoptionRequestsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Approve(int id)
     {
+        if (id <= 0)
+            return BadRequest(new { error = "Id must be greater than 0." });
+
         try
         {
             var adminUserId = await GetDomainUserIdAsync();
@@ -124,6 +144,9 @@ public class AdoptionRequestsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Reject(int id)
     {
+        if (id <= 0)
+            return BadRequest(new { error = "Id must be greater than 0." });
+
         try
         {
             var adminUserId = await GetDomainUserIdAsync();
@@ -149,6 +172,9 @@ public class AdoptionRequestsController : ControllerBase
     [Authorize]
     public async Task<IActionResult> Cancel(int id)
     {
+        if (id <= 0)
+            return BadRequest(new { error = "Id must be greater than 0." });
+
         try
         {
             var userId = await GetDomainUserIdAsync();
