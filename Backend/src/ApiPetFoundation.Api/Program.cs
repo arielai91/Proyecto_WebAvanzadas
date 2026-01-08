@@ -7,6 +7,9 @@ using ApiPetFoundation.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
 using ApiPetFoundation.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Reflection;
+using ApiPetFoundation.Api.Swagger;
+using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("https://localhost:5001");
@@ -25,7 +28,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins(
+                "http://localhost:4200",
+                "http://localhost:5000",
+                "https://localhost:5000",
+                "http://localhost:5001",
+                "https://localhost:5001")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -43,6 +51,15 @@ builder.Services.AddSwaggerGen(c =>
         Title = "Pet Foundation API",
         Version = "v1"
     });
+
+    var apiXml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var apiXmlPath = Path.Combine(AppContext.BaseDirectory, apiXml);
+    c.IncludeXmlComments(apiXmlPath, includeControllerXmlComments: true);
+
+    var appXml = $"{typeof(ApiPetFoundation.Application.DependencyInjection).Assembly.GetName().Name}.xml";
+    var appXmlPath = Path.Combine(AppContext.BaseDirectory, appXml);
+    if (File.Exists(appXmlPath))
+        c.IncludeXmlComments(appXmlPath);
 
     // Soporta JSON
     c.SupportNonNullableReferenceTypes();
@@ -66,11 +83,11 @@ builder.Services.AddSwaggerGen(c =>
 
     c.AddSecurityDefinition("Bearer", jwtSecurityScheme);
 
-    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-    {
-        { jwtSecurityScheme, Array.Empty<string>() }
-    });
+    c.OperationFilter<AuthorizeCheckOperationFilter>();
+    c.ExampleFilters();
 });
+
+builder.Services.AddSwaggerExamplesFromAssemblyOf<ApiPetFoundation.Api.Swagger.Examples.RegisterRequestExample>();
 
 
 builder.Services.AddValidatorsFromAssembly(typeof(CreatePetRequest).Assembly);

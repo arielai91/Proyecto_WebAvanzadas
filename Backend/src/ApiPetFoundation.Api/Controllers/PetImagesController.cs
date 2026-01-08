@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ApiPetFoundation.Api.Controllers
 {
+    /// <summary>Gestion de imagen principal de mascotas.</summary>
     [ApiController]
     [Route("api/pets/{petId:int}/image")]
     public class PetImagesController : ControllerBase
@@ -27,6 +28,9 @@ namespace ApiPetFoundation.Api.Controllers
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [RequestSizeLimit(10_000_000)]
+        /// <summary>Sube imagen principal de una mascota (Admin).</summary>
+        /// <param name="petId">Id de la mascota.</param>
+        /// <param name="file">Archivo de imagen.</param>
         public async Task<IActionResult> Upload(int petId, IFormFile file)
         {
             if (petId <= 0)

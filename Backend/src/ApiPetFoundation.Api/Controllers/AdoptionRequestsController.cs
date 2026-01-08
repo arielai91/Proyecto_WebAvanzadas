@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using Swashbuckle.AspNetCore.Filters;
+using ApiPetFoundation.Api.Swagger.Examples;
 
 namespace ApiPetFoundation.Api.Controllers;
 
+/// <summary>Gestion de solicitudes de adopcion.</summary>
 [ApiController]
 [Route("api/[controller]")]
 public class AdoptionRequestsController : ControllerBase
@@ -29,6 +32,17 @@ public class AdoptionRequestsController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize]
+    /// <summary>Lista solicitudes con filtros y paginado (User, Admin).</summary>
+    /// <param name="page">Numero de pagina.</param>
+    /// <param name="pageSize">Tamano de pagina (1-100).</param>
+    /// <param name="status">Estado de la solicitud.</param>
+    /// <param name="petId">Id de la mascota.</param>
+    /// <param name="userId">Id del usuario solicitante.</param>
+    /// <param name="decisionById">Id del usuario que decidio.</param>
+    /// <param name="createdFrom">Fecha inicio.</param>
+    /// <param name="createdTo">Fecha fin.</param>
+    /// <returns>Listado paginado de solicitudes.</returns>
     public async Task<IActionResult> GetAll(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
@@ -55,13 +69,27 @@ public class AdoptionRequestsController : ControllerBase
         if (createdFrom.HasValue && createdTo.HasValue && createdFrom.Value > createdTo.Value)
             return BadRequest(new { error = "createdFrom cannot be greater than createdTo." });
 
+        var isAdmin = User.IsInRole("Admin");
+        int? effectiveUserId = userId;
+        int? effectiveDecisionById = decisionById;
+
+        if (!isAdmin)
+        {
+            var currentUserId = await GetDomainUserIdAsync();
+            if (currentUserId == null)
+                return Unauthorized();
+
+            effectiveUserId = currentUserId;
+            effectiveDecisionById = null;
+        }
+
         var requests = await _adoptionRequestService.GetPagedWithDetailsAsync(
             page,
             pageSize,
             status,
             petId,
-            userId,
-            decisionById,
+            effectiveUserId,
+            effectiveDecisionById,
             createdFrom,
             createdTo);
 
@@ -77,6 +105,10 @@ public class AdoptionRequestsController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize]
+    /// <summary>Obtiene una solicitud por id (User, Admin).</summary>
+    /// <param name="id">Id de la solicitud.</param>
+    /// <returns>Solicitud encontrada.</returns>
     public async Task<IActionResult> GetById(int id)
     {
         if (id <= 0)
@@ -86,11 +118,26 @@ public class AdoptionRequestsController : ControllerBase
         if (request == null)
             return NotFound();
 
+        if (!User.IsInRole("Admin"))
+        {
+            var currentUserId = await GetDomainUserIdAsync();
+            if (currentUserId == null)
+                return Unauthorized();
+
+            if (request.UserId != currentUserId.Value)
+                return Forbid();
+        }
+
         return Ok(_adoptionRequestService.MapToResponse(request));
     }
 
     [HttpPost]
     [Authorize]
+    /// <summary>Crea una solicitud de adopcion (User, Admin).</summary>
+    /// <param name="requestDto">Datos de la solicitud.</param>
+    /// <returns>Solicitud creada.</returns>
+    [SwaggerRequestExample(typeof(CreateAdoptionRequestRequest), typeof(CreateAdoptionRequestExample))]
+    [SwaggerResponseExample(201, typeof(AdoptionRequestResponseExample))]
     public async Task<IActionResult> Create([FromBody] CreateAdoptionRequestRequest requestDto)
     {
         try
@@ -114,6 +161,8 @@ public class AdoptionRequestsController : ControllerBase
 
     [HttpPost("{id}/approve")]
     [Authorize(Roles = "Admin")]
+    /// <summary>Aprueba una solicitud (Admin).</summary>
+    /// <param name="id">Id de la solicitud.</param>
     public async Task<IActionResult> Approve(int id)
     {
         if (id <= 0)
@@ -142,6 +191,8 @@ public class AdoptionRequestsController : ControllerBase
 
     [HttpPost("{id}/reject")]
     [Authorize(Roles = "Admin")]
+    /// <summary>Rechaza una solicitud (Admin).</summary>
+    /// <param name="id">Id de la solicitud.</param>
     public async Task<IActionResult> Reject(int id)
     {
         if (id <= 0)
@@ -170,6 +221,8 @@ public class AdoptionRequestsController : ControllerBase
 
     [HttpPost("{id}/cancel")]
     [Authorize]
+    /// <summary>Cancela una solicitud (User, Admin).</summary>
+    /// <param name="id">Id de la solicitud.</param>
     public async Task<IActionResult> Cancel(int id)
     {
         if (id <= 0)
@@ -209,4 +262,3 @@ public class AdoptionRequestsController : ControllerBase
         return user?.Id;
     }
 }
-

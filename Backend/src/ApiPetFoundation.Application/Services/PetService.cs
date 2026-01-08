@@ -39,8 +39,19 @@ namespace ApiPetFoundation.Application.Services
                 dto.Age,
                 dto.Sex,
                 dto.Size,
-                dto.Description,
-                dto.Status);
+                dto.Description);
+        }
+
+        public void PatchPetFromDto(Pet pet, PatchPetRequest dto)
+        {
+            pet.PatchDetails(
+                dto.Name,
+                dto.Species,
+                dto.Breed,
+                dto.Age,
+                dto.Sex,
+                dto.Size,
+                dto.Description);
         }
 
         // Convert Entity -> Response DTO (para Swagger)

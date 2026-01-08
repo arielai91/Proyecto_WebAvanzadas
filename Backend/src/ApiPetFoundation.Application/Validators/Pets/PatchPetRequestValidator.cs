@@ -1,58 +1,59 @@
-using FluentValidation;
 using System.Linq;
 using ApiPetFoundation.Application.DTOs.Pets;
 using ApiPetFoundation.Domain.Constants;
+using FluentValidation;
 
 namespace ApiPetFoundation.Application.Validators.Pets
 {
-    public class UpdatePetRequestValidator : AbstractValidator<UpdatePetRequest>
+    public class PatchPetRequestValidator : AbstractValidator<PatchPetRequest>
     {
-        public UpdatePetRequestValidator()
+        public PatchPetRequestValidator()
         {
             RuleFor(x => x.Name)
-                .NotEmpty()
                 .MinimumLength(2)
                 .MaximumLength(50)
                 .Must(BeTrimmed)
                 .Must(NotContainControlChars)
-                .Must(NotContainAngleBrackets);
+                .Must(NotContainAngleBrackets)
+                .When(x => x.Name != null);
 
             RuleFor(x => x.Species)
-                .NotEmpty()
                 .MinimumLength(2)
                 .MaximumLength(30)
                 .Must(BeTrimmed)
                 .Must(NotContainControlChars)
-                .Must(NotContainAngleBrackets);
+                .Must(NotContainAngleBrackets)
+                .When(x => x.Species != null);
 
             RuleFor(x => x.Breed)
-                .NotEmpty()
                 .MinimumLength(2)
                 .MaximumLength(30)
                 .Must(BeTrimmed)
                 .Must(NotContainControlChars)
-                .Must(NotContainAngleBrackets);
+                .Must(NotContainAngleBrackets)
+                .When(x => x.Breed != null);
 
             RuleFor(x => x.Age)
                 .GreaterThanOrEqualTo(0)
-                .LessThanOrEqualTo(50);
+                .LessThanOrEqualTo(50)
+                .When(x => x.Age.HasValue);
 
             RuleFor(x => x.Sex)
-                .NotEmpty()
                 .Must(PetSexes.IsValid)
-                .WithMessage($"Sex must be one of: {string.Join(", ", PetSexes.Allowed)}.");
+                .WithMessage($"Sex must be one of: {string.Join(", ", PetSexes.Allowed)}.")
+                .When(x => x.Sex != null);
 
             RuleFor(x => x.Size)
-                .NotEmpty()
                 .Must(PetSizes.IsValid)
-                .WithMessage($"Size must be one of: {string.Join(", ", PetSizes.Allowed)}.");
+                .WithMessage($"Size must be one of: {string.Join(", ", PetSizes.Allowed)}.")
+                .When(x => x.Size != null);
 
             RuleFor(x => x.Description)
-                .NotEmpty()
                 .MinimumLength(10)
                 .MaximumLength(500)
                 .Must(NotContainControlChars)
-                .Must(NotContainAngleBrackets);
+                .Must(NotContainAngleBrackets)
+                .When(x => x.Description != null);
         }
 
         private static bool BeTrimmed(string? value)

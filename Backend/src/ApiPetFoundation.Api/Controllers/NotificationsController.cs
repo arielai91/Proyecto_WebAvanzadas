@@ -4,9 +4,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Swashbuckle.AspNetCore.Filters;
+using ApiPetFoundation.Api.Swagger.Examples;
 
 namespace ApiPetFoundation.Api.Controllers
 {
+    /// <summary>Gestion de notificaciones del usuario.</summary>
     [ApiController]
     [Route("api/notifications")]
     public class NotificationsController : ControllerBase
@@ -24,6 +27,13 @@ namespace ApiPetFoundation.Api.Controllers
 
         [HttpGet]
         [Authorize]
+        /// <summary>Lista notificaciones del usuario autenticado (User, Admin).</summary>
+        /// <param name="page">Numero de pagina.</param>
+        /// <param name="pageSize">Tamano de pagina (1-100).</param>
+        /// <param name="type">Filtro por tipo.</param>
+        /// <param name="isRead">Filtro por leidas/no leidas.</param>
+        /// <param name="createdFrom">Fecha inicio.</param>
+        /// <param name="createdTo">Fecha fin.</param>
         public async Task<IActionResult> GetMyNotifications(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 20,
@@ -72,6 +82,8 @@ namespace ApiPetFoundation.Api.Controllers
 
         [HttpGet("unread")]
         [Authorize]
+        /// <summary>Lista notificaciones no leidas (User, Admin).</summary>
+        [SwaggerResponseExample(200, typeof(NotificationResponseExample))]
         public async Task<IActionResult> GetUnread()
         {
             var userId = await GetDomainUserIdAsync();
@@ -85,6 +97,8 @@ namespace ApiPetFoundation.Api.Controllers
 
         [HttpPost("{id}/read")]
         [Authorize]
+        /// <summary>Marca una notificacion como leida (User, Admin).</summary>
+        /// <param name="id">Id de la notificacion.</param>
         public async Task<IActionResult> MarkAsRead(int id)
         {
             if (id <= 0)
@@ -104,6 +118,7 @@ namespace ApiPetFoundation.Api.Controllers
 
         [HttpPost("read-all")]
         [Authorize]
+        /// <summary>Marca todas las notificaciones como leidas (User, Admin).</summary>
         public async Task<IActionResult> MarkAllAsRead()
         {
             var userId = await GetDomainUserIdAsync();

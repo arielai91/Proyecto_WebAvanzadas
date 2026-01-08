@@ -57,8 +57,7 @@ namespace ApiPetFoundation.Domain.Entities
             int age,
             string sex,
             string size,
-            string description,
-            string status)
+            string description)
         {
             Name = name;
             Species = species;
@@ -67,7 +66,33 @@ namespace ApiPetFoundation.Domain.Entities
             Sex = sex;
             Size = size;
             Description = description;
-            Status = status;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void PatchDetails(
+            string? name,
+            string? species,
+            string? breed,
+            int? age,
+            string? sex,
+            string? size,
+            string? description)
+        {
+            if (name != null)
+                Name = name;
+            if (species != null)
+                Species = species;
+            if (breed != null)
+                Breed = breed;
+            if (age.HasValue)
+                Age = age.Value;
+            if (sex != null)
+                Sex = sex;
+            if (size != null)
+                Size = size;
+            if (description != null)
+                Description = description;
+
             UpdatedAt = DateTime.UtcNow;
         }
 

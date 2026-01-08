@@ -8,6 +8,7 @@ namespace ApiPetFoundation.Application.Interfaces.Services
     {
         Pet CreatePetFromDto(CreatePetRequest dto, int userId);
         void UpdatePetFromDto(Pet pet, UpdatePetRequest dto);
+        void PatchPetFromDto(Pet pet, PatchPetRequest dto);
         PetResponse MapToResponse(Pet pet);
         PetResponseDetails MapToDetailsResponse(Pet pet);
         Task<IEnumerable<Pet>> GetAllPetsAsync();
