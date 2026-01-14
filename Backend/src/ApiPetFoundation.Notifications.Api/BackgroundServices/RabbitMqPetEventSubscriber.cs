@@ -186,9 +186,8 @@ public class RabbitMqPetEventSubscriber : BackgroundService
             }
             else if (notificationEvent.Event.Equals("AdoptionRequestCreated", StringComparison.OrdinalIgnoreCase))
             {
-                // Notificar a todos los administradores
-                var allUsers = await userService.GetAllUsersAsync();
-                var admins = allUsers.Where(u => u.Roles?.Contains("Admin") == true);
+                // Notificar solo a los administradores
+                var admins = await userService.GetUsersByRoleAsync("Admin");
                 
                 foreach (var admin in admins)
                 {

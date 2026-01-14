@@ -29,6 +29,15 @@ namespace ApiPetFoundation.Infrastructure.Repositories
             return await _context.UsersDomain.FirstOrDefaultAsync(u => u.IdentityUserId == identityUserId);
         }
 
+        public async Task<IEnumerable<User>> GetUsersByRoleAsync(string roleName)
+        {
+            return await (from userDomain in _context.UsersDomain
+                           join userRole in _context.UserRoles on userDomain.IdentityUserId equals userRole.UserId
+                           join role in _context.Roles on userRole.RoleId equals role.Id
+                           where role.Name == roleName
+                           select userDomain).ToListAsync();
+        }
+
         public async Task AddAsync(User entity)
         {
             await _context.UsersDomain.AddAsync(entity);

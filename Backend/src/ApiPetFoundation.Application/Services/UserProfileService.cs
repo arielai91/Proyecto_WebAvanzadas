@@ -23,4 +23,14 @@ public class UserProfileService : IUserProfileService
     {
         return await _userRepository.GetByIdentityUserIdAsync(identityUserId);
     }
+
+    public async Task<IEnumerable<User>> GetAllUsersAsync()
+    {
+        return await _userRepository.GetAllAsync();
+    }
+
+    public async Task<IEnumerable<User>> GetUsersByRoleAsync(string roleName)
+    {
+        return await _userRepository.GetUsersByRoleAsync(roleName);
+    }
 }
