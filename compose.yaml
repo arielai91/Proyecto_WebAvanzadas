@@ -69,6 +69,10 @@ services:
     container_name: petfoundation-notifications-api
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORT=5003
+      - ASPNETCORE_HTTPS_PORT=5004
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=petfoundationdb;Username=postgres;Password=postgreSQL2025
+      - RabbitMq__HostName=rabbitmq
     ports:
       - "5003:5003"
       - "5004:5004"
