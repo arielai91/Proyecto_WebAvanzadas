@@ -1,0 +1,31 @@
+# Multi-stage build for Notifications API
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+# Copy solution and project files
+COPY ["Proyecto_PetFoundation.sln", "./"]
+COPY ["src/ApiPetFoundation.Notifications.Api/ApiPetFoundation.Notifications.Api.csproj", "src/ApiPetFoundation.Notifications.Api/"]
+COPY ["src/ApiPetFoundation.Application/ApiPetFoundation.Application.csproj", "src/ApiPetFoundation.Application/"]
+COPY ["src/ApiPetFoundation.Domain/ApiPetFoundation.Domain.csproj", "src/ApiPetFoundation.Domain/"]
+COPY ["src/ApiPetFoundation.Infrastructure/ApiPetFoundation.Infrastructure.csproj", "src/ApiPetFoundation.Infrastructure/"]
+
+# Restore dependencies
+RUN dotnet restore "src/ApiPetFoundation.Notifications.Api/ApiPetFoundation.Notifications.Api.csproj"
+
+# Copy all source files
+COPY . .
+
+# Build the project
+WORKDIR "/src/src/ApiPetFoundation.Notifications.Api"
+RUN dotnet build "ApiPetFoundation.Notifications.Api.csproj" -c Release -o /app/build
+
+# Publish the application
+FROM build AS publish
+RUN dotnet publish "ApiPetFoundation.Notifications.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+# Final runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+WORKDIR /app
+EXPOSE 5004
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "ApiPetFoundation.Notifications.Api.dll"]

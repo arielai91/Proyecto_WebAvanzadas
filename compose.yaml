@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: docker.io/library/postgres:16-alpine
+    container_name: petfoundation-postgres
+    environment:
+      POSTGRES_DB: petfoundationdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgreSQL2025
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # RabbitMQ Message Broker
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: petfoundation-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  # REST API
+  rest-api:
+    build:
+      context: .
+      dockerfile: Backend/Dockerfile.api
+    container_name: petfoundation-rest-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=petfoundationdb;Username=postgres;Password=postgreSQL2025
+      - RabbitMq__HostName=rabbitmq
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "5001:5001"
+
+  # SOAP API
+  soap-api:
+    build:
+      context: .
+      dockerfile: Backend/Dockerfile.soap
+    container_name: petfoundation-soap-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    ports:
+      - "5002:5002"
+
+  # Notifications API
+  notifications-api:
+    build:
+      context: .
+      dockerfile: Backend/Dockerfile.notifications
+    container_name: petfoundation-notifications-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    ports:
+      - "5003:5003"
+      - "5004:5004"
+
+  # API Gateway
+  gateway:
+    build:
+      context: .
+      dockerfile: Backend/Dockerfile.gateway
+    container_name: petfoundation-gateway
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    ports:
+      - "5000:5000"
+
+  # Frontend
+  frontend:
+    build:
+      context: ./Proyecto-PetFoundation
+      dockerfile: Dockerfile
+    container_name: petfoundation-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - gateway
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
