@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using SoapCore;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.UseUrls("https://localhost:5003");
+var httpsPort = builder.Configuration.GetValue<int?>("ASPNETCORE_HTTPS_PORT") ?? 5003;
+builder.WebHost.UseUrls($"https://localhost:{httpsPort}");
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);

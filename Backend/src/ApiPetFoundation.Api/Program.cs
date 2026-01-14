@@ -13,11 +13,11 @@ using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure URLs - HTTP and HTTPS in development
+// Configure URLs - HTTPS only (Gateway uses port 5000)
+var httpsPort = builder.Configuration.GetValue<int?>("ASPNETCORE_HTTPS_PORT") ?? 5001;
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenLocalhost(5000); // HTTP
-    options.ListenLocalhost(5001, listenOptions =>
+    options.ListenLocalhost(httpsPort, listenOptions =>
     {
         listenOptions.UseHttps();
     });

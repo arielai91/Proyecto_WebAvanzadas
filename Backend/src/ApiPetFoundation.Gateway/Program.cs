@@ -1,7 +1,8 @@
 using Yarp.ReverseProxy;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.UseUrls("https://localhost:5000");
+var httpsPort = builder.Configuration.GetValue<int?>("ASPNETCORE_HTTPS_PORT") ?? 5000;
+builder.WebHost.UseUrls($"https://localhost:{httpsPort}");
 
 builder.Services.AddCors(options =>
 {

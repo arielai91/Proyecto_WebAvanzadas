@@ -71,5 +71,4 @@ export class AppComponent implements OnInit {
       console.log('🔗 Conectado a SignalR con ID:', connectionId);
     });
   }
-  }
 }

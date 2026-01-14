@@ -19,10 +19,7 @@ export class SignalrService {
 
   // Iniciar conexión con SignalR
   public startConnection(token?: string): void {
-    const options: signalR.IHttpConnectionOptions = {
-      skipNegotiation: true,
-      transport: signalR.HttpTransportType.WebSockets
-    };
+    const options: signalR.IHttpConnectionOptions = {};
 
     // Agregar token de autenticación si está disponible
     if (token) {
@@ -32,6 +29,7 @@ export class SignalrService {
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(API_CONFIG.signalrHubUrl, options)
       .withAutomaticReconnect()
+      .configureLogging(signalR.LogLevel.Information)
       .build();
 
     this.hubConnection

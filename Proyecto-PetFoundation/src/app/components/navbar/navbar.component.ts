@@ -93,6 +93,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.signalrService.stopConnection();
     this.router.navigate(['/login']);
     this.menuOpen = false;
+  }
 
   checkNotificationPermission(): void {
     if ('Notification' in window && Notification.permission === 'default') {
@@ -113,6 +114,5 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   dismissNotificationBanner(): void {
     this.showNotificationBanner = false;
-  }
   }
 }

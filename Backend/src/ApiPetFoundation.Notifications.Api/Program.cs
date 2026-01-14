@@ -9,11 +9,11 @@ using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure URLs - HTTP and HTTPS in development
+// Configure URLs - HTTPS only (HTTP port 5003 conflicts with SOAP API)
+var httpsPort = builder.Configuration.GetValue<int?>("ASPNETCORE_HTTPS_PORT") ?? 5004;
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenLocalhost(5003); // HTTP
-    options.ListenLocalhost(5004, listenOptions =>
+    options.ListenLocalhost(httpsPort, listenOptions =>
     {
         listenOptions.UseHttps();
     });
@@ -50,7 +50,9 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
                 "http://localhost:4200",
+                "https://localhost:4200",
                 "http://localhost:5000",
+                "https://localhost:5000",
                 "https://localhost:5001")
               .AllowAnyHeader()
               .AllowAnyMethod()

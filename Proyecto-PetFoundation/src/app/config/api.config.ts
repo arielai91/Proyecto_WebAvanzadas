@@ -1,4 +1,4 @@
 export const API_CONFIG = {
-  baseUrl: 'http://localhost:5000/api',
-  signalrHubUrl: 'http://localhost:5003/hubs/notifications'
+  baseUrl: 'https://localhost:5000/api',
+  signalrHubUrl: 'https://localhost:5004/hubs/notifications'
 };
