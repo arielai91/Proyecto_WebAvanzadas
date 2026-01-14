@@ -1,6 +1,8 @@
 using System.Text;
 using System.Text.Json;
 using ApiPetFoundation.Application.Events;
+using ApiPetFoundation.Application.Interfaces.Services;
+using ApiPetFoundation.Domain.Entities;
 using ApiPetFoundation.Infrastructure.Configuration;
 using ApiPetFoundation.Notifications.Api.Hubs;
 using Microsoft.AspNetCore.SignalR;
@@ -16,16 +18,19 @@ public class RabbitMqPetEventSubscriber : BackgroundService
     private readonly RabbitMqSettings _settings;
     private readonly ILogger<RabbitMqPetEventSubscriber> _logger;
     private readonly IHubContext<NotificationHub> _hubContext;
+    private readonly IServiceProvider _serviceProvider;
     private IConnection? _connection;
     private IChannel? _channel;
 
     public RabbitMqPetEventSubscriber(
         IOptions<RabbitMqSettings> settings,
         IHubContext<NotificationHub> hubContext,
+        IServiceProvider serviceProvider,
         ILogger<RabbitMqPetEventSubscriber> logger)
     {
         _settings = settings.Value;
         _hubContext = hubContext;
+        _serviceProvider = serviceProvider;
         _logger = logger;
     }
 
@@ -97,6 +102,12 @@ public class RabbitMqPetEventSubscriber : BackgroundService
                 return;
             }
 
+            _logger.LogInformation("Evento recibido: {Event}", notificationEvent.Event);
+
+            // Persistir notificaciones en la base de datos
+            await PersistNotificationAsync(notificationEvent);
+
+            // Enviar notificación en tiempo real via SignalR
             if (notificationEvent.Event.Equals("AdoptionStatusChanged", StringComparison.OrdinalIgnoreCase)
                 && TryGetTargetUserId(notificationEvent, out var targetUserId)
                 && !string.IsNullOrWhiteSpace(targetUserId))
@@ -115,6 +126,85 @@ public class RabbitMqPetEventSubscriber : BackgroundService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error al procesar evento RabbitMQ");
+        }
+    }
+
+    private async Task PersistNotificationAsync(IntegrationEvent notificationEvent)
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+        var userService = scope.ServiceProvider.GetRequiredService<IUserProfileService>();
+
+        try
+        {
+            if (notificationEvent.Event.Equals("PetCreated", StringComparison.OrdinalIgnoreCase))
+            {
+                // Obtener nombre de la mascota
+                var petName = "Una nueva mascota";
+                if (notificationEvent.Data.HasValue && 
+                    notificationEvent.Data.Value.TryGetProperty("Pet", out var petObj) &&
+                    petObj.TryGetProperty("name", out var nameProperty))
+                {
+                    petName = nameProperty.GetString() ?? petName;
+                }
+
+                // Crear notificación para todos los usuarios
+                var allUsers = await userService.GetAllUsersAsync();
+                foreach (var user in allUsers)
+                {
+                    var notification = Notification.Create(
+                        user.Id,
+                        "NEW_PET",
+                        $"{petName} está disponible para adopción"
+                    );
+                    await notificationService.AddNotificationAsync(notification);
+                }
+                _logger.LogInformation("Notificaciones de nueva mascota creadas para {Count} usuarios", allUsers.Count());
+            }
+            else if (notificationEvent.Event.Equals("AdoptionStatusChanged", StringComparison.OrdinalIgnoreCase))
+            {
+                // Notificar al usuario específico
+                if (TryGetTargetUserId(notificationEvent, out var userId) && 
+                    int.TryParse(userId, out var userIdInt))
+                {
+                    var status = "actualizado";
+                    if (notificationEvent.Data.HasValue && 
+                        notificationEvent.Data.Value.TryGetProperty("AdoptionRequest", out var requestObj) &&
+                        requestObj.TryGetProperty("status", out var statusProperty))
+                    {
+                        status = statusProperty.GetString() ?? status;
+                    }
+
+                    var notification = Notification.Create(
+                        userIdInt,
+                        "ADOPTION_STATUS",
+                        $"Tu solicitud de adopción ha sido {status}"
+                    );
+                    await notificationService.AddNotificationAsync(notification);
+                    _logger.LogInformation("Notificación de cambio de estado creada para usuario {UserId}", userIdInt);
+                }
+            }
+            else if (notificationEvent.Event.Equals("AdoptionRequestCreated", StringComparison.OrdinalIgnoreCase))
+            {
+                // Notificar a todos los administradores
+                var allUsers = await userService.GetAllUsersAsync();
+                var admins = allUsers.Where(u => u.Roles?.Contains("Admin") == true);
+                
+                foreach (var admin in admins)
+                {
+                    var notification = Notification.Create(
+                        admin.Id,
+                        "NEW_REQUEST",
+                        "Hay una nueva solicitud de adopción pendiente"
+                    );
+                    await notificationService.AddNotificationAsync(notification);
+                }
+                _logger.LogInformation("Notificaciones de nueva solicitud creadas para {Count} administradores", admins.Count());
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al persistir notificación para evento {Event}", notificationEvent.Event);
         }
     }
 

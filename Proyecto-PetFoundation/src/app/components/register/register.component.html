@@ -1,0 +1,103 @@
+<div class="register-container">
+  <div class="register-card">
+    <h2>🐾 Crear Cuenta</h2>
+    <p class="subtitle">Pet Foundation</p>
+
+    <form (ngSubmit)="onSubmit()" #registerForm="ngForm">
+      <div class="form-group">
+        <label for="name">Nombre Completo *</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          [(ngModel)]="registerData.name"
+          required
+          placeholder="Tu nombre completo"
+          [disabled]="isLoading"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          [(ngModel)]="registerData.email"
+          required
+          email
+          placeholder="tu@email.com"
+          [disabled]="isLoading"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Teléfono</label>
+        <input
+          type="tel"
+          id="phone"
+          name="phone"
+          [(ngModel)]="registerData.phone"
+          placeholder="123-456-7890"
+          [disabled]="isLoading"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="address">Dirección</label>
+        <input
+          type="text"
+          id="address"
+          name="address"
+          [(ngModel)]="registerData.address"
+          placeholder="Tu dirección"
+          [disabled]="isLoading"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Contraseña *</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          [(ngModel)]="registerData.password"
+          required
+          minlength="6"
+          placeholder="Mínimo 6 caracteres"
+          [disabled]="isLoading"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirmar Contraseña *</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          name="confirmPassword"
+          [(ngModel)]="confirmPassword"
+          required
+          placeholder="Repite tu contraseña"
+          [disabled]="isLoading"
+        />
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn-primary" 
+        [disabled]="!registerForm.valid || isLoading"
+      >
+        <span *ngIf="!isLoading">Registrarse</span>
+        <span *ngIf="isLoading">Cargando...</span>
+      </button>
+    </form>
+
+    <div class="login-link">
+      ¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión aquí</a>
+    </div>
+  </div>
+</div>

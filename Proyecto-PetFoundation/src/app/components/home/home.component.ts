@@ -1,161 +1,87 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { NavbarComponent } from '../navbar/navbar.component';
+import { Router } from '@angular/router';
+import { PetService } from '../../services/pet.service';
+import { AuthService } from '../../services/auth.service';
 import { SignalrService } from '../../services/signalr.service';
+import { Pet } from '../../models/models';
 import { Subscription } from 'rxjs';
-
-interface Pet {
-  id: number;
-  name: string;
-  species: string;
-  breed: string;
-  age: number;
-  size: string;
-  gender: string;
-  description: string;
-  image: string;
-}
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent],
+  imports: [CommonModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  searchTerm: string = '';
-  selectedSpecies: string = 'all';
-  selectedSize: string = 'all';
-  
-  private subscriptions: Subscription[] = [];
+  featuredPets: Pet[] = [];
+  isLoading = true;
+  isAuthenticated = false;
   newPetNotification: string = '';
   showNotification: boolean = false;
+  
+  private subscriptions: Subscription[] = [];
 
-  allPets: Pet[] = [
-    { 
-      id: 1, 
-      name: 'Max', 
-      species: 'Perro', 
-      breed: 'Labrador', 
-      age: 3, 
-      size: 'Grande',
-      gender: 'Macho',
-      description: 'Max es un perro muy amigable y energético. Le encanta jugar y correr.',
-      image: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400'
-    },
-    { 
-      id: 2, 
-      name: 'Luna', 
-      species: 'Gato', 
-      breed: 'Siamés', 
-      age: 2, 
-      size: 'Pequeño',
-      gender: 'Hembra',
-      description: 'Luna es una gata cariñosa y tranquila. Perfecta para apartamentos.',
-      image: 'https://st5.depositphotos.com/4585465/69544/i/450/depositphotos_695440548-stock-photo-cute-kitten-siamese-cat-indoor.jpg'
-    },
-    { 
-      id: 3, 
-      name: 'Rocky', 
-      species: 'Perro', 
-      breed: 'Bulldog', 
-      age: 4, 
-      size: 'Mediano',
-      gender: 'Macho',
-      description: 'Rocky es un perro leal y protector. Excelente compañero familiar.',
-      image: 'https://images.unsplash.com/photo-1517849845537-4d257902454a?w=400'
-    },
-    { 
-      id: 4, 
-      name: 'Bella', 
-      species: 'Perro', 
-      breed: 'Golden Retriever', 
-      age: 2, 
-      size: 'Grande',
-      gender: 'Hembra',
-      description: 'Bella es dulce y gentil. Le encanta estar con niños.',
-      image: 'https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=400'
-    },
-    { 
-      id: 5, 
-      name: 'Milo', 
-      species: 'Gato', 
-      breed: 'Persa', 
-      age: 1, 
-      size: 'Pequeño',
-      gender: 'Macho',
-      description: 'Milo es juguetón y curioso. Le encanta explorar.',
-      image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400'
-    },
-    { 
-      id: 6, 
-      name: 'Daisy', 
-      species: 'Perro', 
-      breed: 'Beagle', 
-      age: 3, 
-      size: 'Mediano',
-      gender: 'Hembra',
-      description: 'Daisy es activa y aventurera. Necesita mucho ejercicio.',
-      image: 'https://images.unsplash.com/photo-1505628346881-b72b27e84530?w=400'
-    }
-  ];
+  constructor(
+    private petService: PetService,
+    private authService: AuthService,
+    private signalrService: SignalrService,
+    private router: Router
+  ) {}
 
-  constructor(private signalrService: SignalrService) {}
+  ngOnInit(): void {
+    this.isAuthenticated = this.authService.isAuthenticated();
+    this.loadFeaturedPets();
+    this.subscribeToSignalR();
+  }
 
-  ngOnInit() {
-    // Iniciar conexión WebSocket
-    this.signalrService.startConnection();
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
 
-    // Suscribirse a notificaciones de nuevas mascotas
+  loadFeaturedPets(): void {
+    this.petService.getAll({ page: 1, pageSize: 6, status: 'Available' }).subscribe({
+      next: (response) => {
+        this.featuredPets = response.items;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error cargando mascotas:', error);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  subscribeToSignalR(): void {
     const newPetSub = this.signalrService.newPetAvailable$.subscribe((petData) => {
       console.log('🐾 Nueva mascota recibida:', petData);
-      this.showNewPetNotification(petData);
-      // Aquí puedes agregar la nueva mascota al array
-      // this.allPets.push(petData);
+      this.showNewPetNotification(petData.Pet?.name || 'Nueva mascota');
+      this.loadFeaturedPets();
     });
 
-    // Suscribirse a cambios de estado de adopción
     const statusSub = this.signalrService.adoptionStatusChanged$.subscribe((statusData) => {
       console.log('✅ Estado de adopción actualizado:', statusData);
-      // Aquí puedes mostrar una notificación al usuario
+      this.loadFeaturedPets();
     });
 
     this.subscriptions.push(newPetSub, statusSub);
   }
 
-  ngOnDestroy() {
-    // Limpiar suscripciones
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-    // Cerrar conexión WebSocket
-    this.signalrService.stopConnection();
-  }
-
-  showNewPetNotification(petData: any) {
-    this.newPetNotification = `¡Nueva mascota disponible: ${petData.name}!`;
+  showNewPetNotification(petName: string): void {
+    this.newPetNotification = `¡Nueva mascota disponible: ${petName}!`;
     this.showNotification = true;
     
-    // Ocultar notificación después de 5 segundos
     setTimeout(() => {
       this.showNotification = false;
     }, 5000);
   }
 
-  get filteredPets(): Pet[] {
-    return this.allPets.filter(pet => {
-      const matchesSearch = pet.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                          pet.breed.toLowerCase().includes(this.searchTerm.toLowerCase());
-      const matchesSpecies = this.selectedSpecies === 'all' || pet.species === this.selectedSpecies;
-      const matchesSize = this.selectedSize === 'all' || pet.size === this.selectedSize;
-      
-      return matchesSearch && matchesSpecies && matchesSize;
-    });
+  viewAllPets(): void {
+    this.router.navigate(['/pets']);
   }
 
-  clearFilters() {
-    this.searchTerm = '';
-    this.selectedSpecies = 'all';
-    this.selectedSize = 'all';
+  viewPetDetail(petId: number): void {
+    this.router.navigate(['/pets', petId]);
   }
 }

@@ -108,6 +108,7 @@ namespace ApiPetFoundation.Infrastructure.Identity
             return new AuthResponse
             {
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
+                UserId = domainUser?.Id ?? 0,
                 Email = user.Email!,
                 Name = displayName,
                 Roles = roles.ToList()

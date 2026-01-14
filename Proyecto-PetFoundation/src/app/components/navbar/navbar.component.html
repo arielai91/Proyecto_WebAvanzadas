@@ -2,7 +2,7 @@
   <div class="nav-container">
     <div class="nav-brand">
       <span class="logo">🐾</span>
-      <h2>Pet Foundation</h2>
+      <h2 routerLink="/">Pet Foundation</h2>
     </div>
 
     <button class="menu-toggle" (click)="toggleMenu()">
@@ -13,10 +13,42 @@
 
     <ul class="nav-menu" [class.active]="menuOpen">
       <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Inicio</a></li>
-      <li><a routerLink="/adoptar" routerLinkActive="active">Adoptar</a></li>
-      <li><a routerLink="/donar" routerLinkActive="active">Donar</a></li>
-      <li><a routerLink="/contacto" routerLinkActive="active">Contacto</a></li>
-      <li><button class="btn-primary">Iniciar Sesión</button></li>
+      <li><a routerLink="/pets" routerLinkActive="active">Mascotas</a></li>
+      
+      <li *ngIf="isAuthenticated">
+        <a routerLink="/adoption-requests" routerLinkActive="active">Solicitudes</a>
+      </li>
+      
+      <li *ngIf="isAuthenticated" class="notifications-item">
+        <a routerLink="/notifications" routerLinkActive="active" class="notification-link">
+          🔔 Notificaciones
+          <span *ngIf="unreadCount > 0" class="badge">{{ unreadCount }}</span>
+        </a>
+      </li>
+
+      <li *ngIf="isAuthenticated" class="user-menu">
+        <span class="user-name">{{ userName }}</span>
+        <button class="btn-logout" (click)="logout()">Cerrar Sesión</button>
+      </li>
+
+      <li *ngIf="!isAuthenticated">
+        <button class="btn-primary" routerLink="/login">Iniciar Sesión</button>
+      </li>
     </ul>
   </div>
 </nav>
+
+<!-- Banner para activar notificaciones -->
+<div class="notification-banner" *ngIf="showNotificationBanner && isAuthenticated">
+  <div class="banner-content">
+    <span class="banner-icon">🔔</span>
+    <div class="banner-text">
+      <strong>Activa las notificaciones</strong>
+      <p>Recibe alertas cuando haya nuevas mascotas o cambios en tus solicitudes</p>
+    </div>
+    <div class="banner-actions">
+      <button class="btn-enable" (click)="enableNotifications()">Activar</button>
+      <button class="btn-dismiss" (click)="dismissNotificationBanner()">Ahora no</button>
+    </div>
+  </div>
+</div>

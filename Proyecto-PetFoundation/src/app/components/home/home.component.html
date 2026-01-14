@@ -1,97 +1,79 @@
-<app-navbar></app-navbar>
-
 <!-- Notificación WebSocket -->
-@if (showNotification) {
-  <div class="websocket-notification">
-    🔔 {{ newPetNotification }}
-  </div>
-}
+<div *ngIf="showNotification" class="websocket-notification">
+  🔔 {{ newPetNotification }}
+</div>
 
 <div class="container">
   <header class="hero">
-    <h1>🐾 Héroes Peluditos</h1>
+    <h1>🐾 Pet Foundation</h1>
     <p class="subtitle">Dale una oportunidad a quien solo quiere amar. ¡Adopta, no compres!</p>
+    <button class="btn-hero" (click)="viewAllPets()">Ver Todas las Mascotas</button>
   </header>
 
-  <!-- Búsqueda y Filtros -->
-  <section class="search-section">
-    <div class="search-bar">
-      <input 
-        type="text" 
-        [(ngModel)]="searchTerm" 
-        placeholder="🔍 Buscar por nombre o raza..."
-        class="search-input"
-      />
-    </div>
-
-    <div class="filters">
-      <div class="filter-group">
-        <label>Especie:</label>
-        <select [(ngModel)]="selectedSpecies" class="filter-select">
-          <option value="all">Todas</option>
-          <option value="Perro">Perros</option>
-          <option value="Gato">Gatos</option>
-        </select>
-      </div>
-
-      <div class="filter-group">
-        <label>Tamaño:</label>
-        <select [(ngModel)]="selectedSize" class="filter-select">
-          <option value="all">Todos</option>
-          <option value="Pequeño">Pequeño</option>
-          <option value="Mediano">Mediano</option>
-          <option value="Grande">Grande</option>
-        </select>
-      </div>
-
-      <button (click)="clearFilters()" class="btn-clear">Limpiar Filtros</button>
-    </div>
-  </section>
-
-  <!-- Resultados -->
-  <section class="results-section">
-    <h2>Mascotas Disponibles ({{ filteredPets.length }})</h2>
+  <!-- Mascotas Destacadas -->
+  <section class="featured-section">
+    <h2>✨ Mascotas Disponibles</h2>
     
-    @if (filteredPets.length === 0) {
-      <div class="no-results">
-        <p>🐾 No se encontraron mascotas con esos criterios</p>
-        <button (click)="clearFilters()" class="btn-primary">Ver todas las mascotas</button>
-      </div>
-    } @else {
-      <div class="pets-grid">
-        @for (pet of filteredPets; track pet.id) {
-          <div class="pet-card">
-            <div class="pet-image">
-              <img [src]="pet.image" [alt]="pet.name" />
-              <span class="pet-badge">{{ pet.species }}</span>
-            </div>
-            <div class="pet-content">
-              <h3>{{ pet.name }}</h3>
-              <div class="pet-info">
-                <span class="info-item">🐾 {{ pet.breed }}</span>
-                <span class="info-item">🎂 {{ pet.age }} años</span>
-              </div>
-              <div class="pet-info">
-                <span class="info-item">📊 {{ pet.size }}</span>
-                <span class="info-item">{{ pet.gender === 'Macho' ? '♂️' : '♀️' }} {{ pet.gender }}</span>
-              </div>
-              <p class="pet-description">{{ pet.description }}</p>
-              <div class="pet-actions">
-                <button class="btn-adopt">Adoptar</button>
-                <button class="btn-details">Ver más</button>
-              </div>
-            </div>
+    <div *ngIf="isLoading" class="loading">
+      <div class="spinner"></div>
+      <p>Cargando mascotas...</p>
+    </div>
+
+    <div *ngIf="!isLoading && featuredPets.length === 0" class="no-results">
+      <p>😿 No hay mascotas disponibles en este momento</p>
+    </div>
+
+    <div *ngIf="!isLoading && featuredPets.length > 0" class="pets-grid">
+      <div *ngFor="let pet of featuredPets" class="pet-card" (click)="viewPetDetail(pet.id)">
+        <div class="pet-image">
+          <img [src]="pet.coverImageUrl || 'assets/default-pet.svg'" [alt]="pet.name" />
+          <span class="pet-badge">{{ pet.species }}</span>
+        </div>
+        <div class="pet-content">
+          <h3>{{ pet.name }}</h3>
+          <div class="pet-info">
+            <span class="info-item" *ngIf="pet.breed">🐾 {{ pet.breed }}</span>
+            <span class="info-item" *ngIf="pet.age">🎂 {{ pet.age }} años</span>
           </div>
-        }
+          <div class="pet-info">
+            <span class="info-item">📊 {{ pet.size }}</span>
+            <span class="info-item">{{ pet.sex }}</span>
+          </div>
+          <p class="pet-description">{{ pet.description || 'Sin descripción' }}</p>
+        </div>
       </div>
-    }
+    </div>
+
+    <div class="view-more" *ngIf="!isLoading && featuredPets.length > 0">
+      <button class="btn-primary" (click)="viewAllPets()">Ver Todas</button>
+    </div>
   </section>
 
-  <!-- Sección de CTA -->
-  <section class="cta-section">
-    <h2>¿Quieres ayudar?</h2>
-    <p>Tu donación puede cambiar la vida de muchas mascotas</p>
-    <button class="btn-donate">Donar Ahora</button>
+  <!-- Sección de Beneficios -->
+  <section class="benefits-section">
+    <h2>¿Por qué adoptar?</h2>
+    <div class="benefits-grid">
+      <div class="benefit-card">
+        <div class="benefit-icon">❤️</div>
+        <h3>Salvas una vida</h3>
+        <p>Cada adopción es una segunda oportunidad para una mascota necesitada</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">🏠</div>
+        <h3>Compañía leal</h3>
+        <p>Las mascotas rescatadas son eternamente agradecidas y cariñosas</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">💰</div>
+        <h3>Económico</h3>
+        <p>La adopción es más accesible que comprar una mascota</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">🌟</div>
+        <h3>Apoyas una causa</h3>
+        <p>Ayudas a organizaciones que rescatan y cuidan animales</p>
+      </div>
+    </div>
   </section>
 </div>
 

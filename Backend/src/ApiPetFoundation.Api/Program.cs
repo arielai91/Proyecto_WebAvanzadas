@@ -12,7 +12,16 @@ using ApiPetFoundation.Api.Swagger;
 using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.UseUrls("https://localhost:5001");
+
+// Configure URLs - HTTP and HTTPS in development
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenLocalhost(5000); // HTTP
+    options.ListenLocalhost(5001, listenOptions =>
+    {
+        listenOptions.UseHttps();
+    });
+});
 
 
 builder.Services.AddApplication();
@@ -112,7 +121,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Disabled HTTPS redirection in development to avoid 307 redirects
+// app.UseHttpsRedirection();
 
 app.UseCors("AllowAngular");
 

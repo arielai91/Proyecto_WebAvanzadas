@@ -1,0 +1,110 @@
+<div class="adoption-list-container">
+  <h1>📝 Solicitudes de Adopción</h1>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="filter-row">
+      <select [(ngModel)]="filters.status" class="filter-select">
+        <option [ngValue]="undefined">Todos los estados</option>
+        <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+      </select>
+
+      <input
+        type="number"
+        [(ngModel)]="filters.petId"
+        placeholder="ID de Mascota"
+        class="filter-input"
+      />
+
+      <div class="filter-actions">
+        <button (click)="applyFilters()" class="btn-apply">Aplicar</button>
+        <button (click)="clearFilters()" class="btn-clear">Limpiar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner"></div>
+    <p>Cargando solicitudes...</p>
+  </div>
+
+  <!-- Request List -->
+  <div *ngIf="!isLoading && requests.length > 0" class="request-list">
+    <div *ngFor="let request of requests" class="request-card">
+      <div class="request-header">
+        <div class="request-info">
+          <h3 (click)="viewPetDetail(request.petId)" class="pet-name">
+            🐾 {{ request.pet?.name || 'Mascota #' + request.petId }}
+          </h3>
+          <span class="request-status" [ngClass]="getStatusClass(request.status)">
+            {{ request.status }}
+          </span>
+        </div>
+        <div class="request-date">
+          <small>{{ request.createdAt | date:'medium' }}</small>
+        </div>
+      </div>
+
+      <div class="request-body">
+        <div class="info-row">
+          <strong>Solicitante:</strong>
+          <span>{{ request.user?.name || 'Usuario #' + request.userId }}</span>
+        </div>
+
+        <div class="info-row">
+          <strong>Razón:</strong>
+          <p class="request-reason">{{ request.reason }}</p>
+        </div>
+
+        <div class="info-row" *ngIf="request.pet">
+          <strong>Mascota:</strong>
+          <span>{{ request.pet.species }} - {{ request.pet.size }} - {{ request.pet.sex }}</span>
+        </div>
+
+        <div class="info-row" *ngIf="request.decisionDate">
+          <strong>Fecha de Decisión:</strong>
+          <span>{{ request.decisionDate | date:'medium' }}</span>
+        </div>
+      </div>
+
+      <div class="request-actions">
+        <!-- Admin Actions -->
+        <div *ngIf="isAdmin && request.status === 'Pending'" class="admin-actions">
+          <button (click)="approveRequest(request.id, $event)" class="btn-approve">
+            ✓ Aprobar
+          </button>
+          <button (click)="rejectRequest(request.id, $event)" class="btn-reject">
+            ✗ Rechazar
+          </button>
+        </div>
+
+        <!-- User Actions -->
+        <div *ngIf="!isAdmin && request.status === 'Pending'" class="user-actions">
+          <button (click)="cancelRequest(request.id, $event)" class="btn-cancel-request">
+            Cancelar Solicitud
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && requests.length === 0" class="empty-state">
+    <p>😿 No se encontraron solicitudes de adopción</p>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!isLoading && totalCount > 0" class="pagination">
+    <button (click)="previousPage()" [disabled]="currentPage === 1" class="btn-page">
+      ← Anterior
+    </button>
+    <span class="page-info">
+      Página {{ currentPage }} de {{ Math.ceil(totalCount / pageSize) }}
+      ({{ totalCount }} total)
+    </span>
+    <button (click)="nextPage()" [disabled]="currentPage * pageSize >= totalCount" class="btn-page">
+      Siguiente →
+    </button>
+  </div>
+</div>

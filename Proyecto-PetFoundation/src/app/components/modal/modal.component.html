@@ -1,0 +1,51 @@
+<div class="modal-backdrop" *ngIf="isOpen" (click)="onBackdropClick($event)">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3>{{ title }}</h3>
+      <button class="close-btn" (click)="onCancel()" [disabled]="isLoading">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <p *ngIf="message" class="modal-message">{{ message }}</p>
+      
+      <div class="form-group" *ngIf="showInput">
+        <label *ngIf="inputLabel">{{ inputLabel }}</label>
+        <textarea 
+          *ngIf="inputType === 'textarea'"
+          [(ngModel)]="inputValue"
+          [placeholder]="inputPlaceholder"
+          rows="4"
+          [disabled]="isLoading"
+          required
+        ></textarea>
+        <input 
+          *ngIf="inputType === 'text'"
+          type="text"
+          [(ngModel)]="inputValue"
+          [placeholder]="inputPlaceholder"
+          [disabled]="isLoading"
+          required
+        />
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button 
+        *ngIf="showCancel"
+        class="btn-cancel" 
+        (click)="onCancel()"
+        [disabled]="isLoading"
+      >
+        {{ cancelText }}
+      </button>
+      <button 
+        class="btn-confirm" 
+        (click)="onConfirm()"
+        [disabled]="isLoading || (showInput && !inputValue.trim())"
+      >
+        <span *ngIf="!isLoading">{{ confirmText }}</span>
+        <span *ngIf="isLoading">Procesando...</span>
+      </button>
+    </div>
+  </div>
+</div>

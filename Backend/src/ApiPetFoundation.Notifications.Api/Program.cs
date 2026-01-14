@@ -8,7 +8,16 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.UseUrls("https://localhost:5004");
+
+// Configure URLs - HTTP and HTTPS in development
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenLocalhost(5003); // HTTP
+    options.ListenLocalhost(5004, listenOptions =>
+    {
+        listenOptions.UseHttps();
+    });
+});
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -39,15 +48,20 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowGateway", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(
+                "http://localhost:4200",
+                "http://localhost:5000",
+                "https://localhost:5001")
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
+// Disabled HTTPS redirection in development to avoid connection issues
+// app.UseHttpsRedirection();
 app.UseCors("AllowGateway");
 app.UseRouting();
 

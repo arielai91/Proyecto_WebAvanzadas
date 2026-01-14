@@ -1,0 +1,54 @@
+<div class="notifications-container">
+  <div class="notifications-header">
+    <h1>🔔 Notificaciones</h1>
+    <button 
+      *ngIf="unreadCount > 0" 
+      (click)="markAllAsRead()" 
+      class="btn-mark-all"
+    >
+      Marcar todas como leídas
+    </button>
+  </div>
+
+  <div class="unread-badge" *ngIf="unreadCount > 0">
+    {{ unreadCount }} notificación{{ unreadCount !== 1 ? 'es' : '' }} sin leer
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner"></div>
+    <p>Cargando notificaciones...</p>
+  </div>
+
+  <!-- Notifications List -->
+  <div *ngIf="!isLoading && notifications.length > 0" class="notifications-list">
+    <div 
+      *ngFor="let notification of notifications" 
+      class="notification-card"
+      [class.unread]="!notification.isRead"
+      (click)="handleNotificationClick(notification)"
+    >
+      <div class="notification-icon">
+        {{ getNotificationIcon(notification.type) }}
+      </div>
+
+      <div class="notification-content">
+        <h3>{{ notification.title }}</h3>
+        <p>{{ notification.message }}</p>
+        <small class="notification-time">
+          {{ notification.createdAt | date:'medium' }}
+        </small>
+      </div>
+
+      <div class="notification-indicator" *ngIf="!notification.isRead">
+        <span class="dot"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && notifications.length === 0" class="empty-state">
+    <div class="empty-icon">🔕</div>
+    <p>No tienes notificaciones</p>
+  </div>
+</div>

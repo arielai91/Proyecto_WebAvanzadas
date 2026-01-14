@@ -1,0 +1,117 @@
+<div class="pet-detail-container" *ngIf="!isLoading && pet">
+  <div class="back-button">
+    <button (click)="goBack()" class="btn-back">← Volver a la lista</button>
+  </div>
+
+  <div class="pet-detail-card">
+    <div class="pet-image-section">
+      <img [src]="pet.coverImageUrl || 'assets/default-pet.svg'" [alt]="pet.name" class="pet-main-image" />
+      <div class="pet-status-badge" [ngClass]="'status-' + pet.status.toLowerCase()">
+        {{ pet.status }}
+      </div>
+    </div>
+
+    <div class="pet-info-section">
+      <h1>{{ pet.name }}</h1>
+      
+      <div class="pet-quick-info">
+        <div class="info-item">
+          <span class="label">🐾 Especie:</span>
+          <span class="value">{{ pet.species }}</span>
+        </div>
+        <div class="info-item" *ngIf="pet.breed">
+          <span class="label">🏷️ Raza:</span>
+          <span class="value">{{ pet.breed }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">⚤ Sexo:</span>
+          <span class="value">{{ pet.sex }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">📏 Tamaño:</span>
+          <span class="value">{{ pet.size }}</span>
+        </div>
+        <div class="info-item" *ngIf="pet.age">
+          <span class="label">🎂 Edad:</span>
+          <span class="value">{{ pet.age }} años</span>
+        </div>
+        <div class="info-item" *ngIf="pet.color">
+          <span class="label">🎨 Color:</span>
+          <span class="value">{{ pet.color }}</span>
+        </div>
+      </div>
+
+      <div class="pet-description" *ngIf="pet.description">
+        <h3>Sobre {{ pet.name }}</h3>
+        <p>{{ pet.description }}</p>
+      </div>
+
+      <div class="pet-metadata">
+        <small>Publicado: {{ pet.createdAt | date:'medium' }}</small>
+        <small *ngIf="pet.updatedAt">Actualizado: {{ pet.updatedAt | date:'medium' }}</small>
+      </div>
+
+      <div class="action-buttons">
+        <button 
+          *ngIf="isAuthenticated && !isAdmin && pet.status === 'Available'" 
+          (click)="openAdoptionModal()" 
+          class="btn-adopt"
+          [disabled]="isAdopting"
+        >
+          <span *ngIf="!isAdopting">❤️ Solicitar Adopción</span>
+          <span *ngIf="isAdopting">Enviando...</span>
+        </button>
+
+        <button *ngIf="isAdmin" (click)="editPet()" class="btn-edit-detail">
+          ✏️ Editar Mascota
+        </button>
+
+        <button *ngIf="!isAuthenticated" (click)="goBack()" class="btn-secondary">
+          Inicia sesión para adoptar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="isLoading" class="loading">
+  <div class="spinner"></div>
+  <p>Cargando información de la mascota...</p>
+</div>
+
+<!-- Modal para solicitud de adopción -->
+<app-modal
+  [isOpen]="showAdoptionModal"
+  title="Solicitud de Adopción"
+  [message]="'¿Por qué quieres adoptar a ' + (pet?.name || 'esta mascota') + '?'"
+  [showInput]="true"
+  inputLabel="Motivo de adopción *"
+  inputPlaceholder="Cuéntanos por qué quieres adoptarla..."
+  inputType="textarea"
+  confirmText="Enviar Solicitud"
+  [isLoading]="isAdopting"
+  (confirm)="requestAdoption($event)"
+  (cancel)="closeAdoptionModal()"
+></app-modal>
+
+<!-- Modal de éxito -->
+<app-modal
+  [isOpen]="showSuccessModal"
+  title="✅ ¡Solicitud Enviada!"
+  message="Tu solicitud de adopción ha sido enviada exitosamente. Te redirigiremos a tus solicitudes..."
+  [showInput]="false"
+  [showCancel]="false"
+  confirmText="Ver Solicitudes"
+  (confirm)="closeSuccessModal()"
+></app-modal>
+
+<!-- Modal de error -->
+<app-modal
+  [isOpen]="showErrorModal"
+  title="❌ Error"
+  [message]="errorMessage"
+  [showInput]="false"
+  [showCancel]="false"
+  confirmText="Cerrar"
+  (confirm)="closeErrorModal()"
+></app-modal>

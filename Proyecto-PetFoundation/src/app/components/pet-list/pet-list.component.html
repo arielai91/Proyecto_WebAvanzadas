@@ -1,0 +1,100 @@
+<div class="pet-list-container">
+  <div class="header">
+    <h1>🐾 Mascotas Disponibles</h1>
+    <button *ngIf="isAdmin" class="btn-create" (click)="createPet()">
+      ➕ Nueva Mascota
+    </button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters">
+    <div class="filter-group">
+      <input
+        type="text"
+        [(ngModel)]="filters.search"
+        placeholder="🔍 Buscar por nombre o descripción..."
+        class="search-input"
+      />
+    </div>
+
+    <div class="filter-row">
+      <select [(ngModel)]="filters.status" class="filter-select">
+        <option [ngValue]="undefined">Todos los estados</option>
+        <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+      </select>
+
+      <select [(ngModel)]="filters.size" class="filter-select">
+        <option [ngValue]="undefined">Todos los tamaños</option>
+        <option *ngFor="let size of sizes" [value]="size">{{ size }}</option>
+      </select>
+
+      <select [(ngModel)]="filters.sex" class="filter-select">
+        <option [ngValue]="undefined">Todos los sexos</option>
+        <option *ngFor="let sex of sexes" [value]="sex">{{ sex }}</option>
+      </select>
+
+      <input
+        type="text"
+        [(ngModel)]="filters.species"
+        placeholder="Especie (ej: Perro, Gato)"
+        class="filter-input"
+      />
+    </div>
+
+    <div class="filter-actions">
+      <button (click)="applyFilters()" class="btn-apply">Aplicar Filtros</button>
+      <button (click)="clearFilters()" class="btn-clear">Limpiar</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner"></div>
+    <p>Cargando mascotas...</p>
+  </div>
+
+  <!-- Pet Grid -->
+  <div *ngIf="!isLoading && pets.length > 0" class="pet-grid">
+    <div *ngFor="let pet of pets" class="pet-card" (click)="viewPetDetail(pet.id)">
+      <div class="pet-image">
+        <img [src]="pet.coverImageUrl || 'assets/default-pet.svg'" [alt]="pet.name" />
+        <span class="pet-status" [ngClass]="getStatusClass(pet.status)">{{ pet.status }}</span>
+      </div>
+      
+      <div class="pet-info">
+        <h3>{{ pet.name }}</h3>
+        <p class="pet-species">{{ pet.species }} {{ pet.breed ? '- ' + pet.breed : '' }}</p>
+        <div class="pet-details">
+          <span class="detail-badge">{{ pet.sex }}</span>
+          <span class="detail-badge">{{ pet.size }}</span>
+          <span class="detail-badge" *ngIf="pet.age">{{ pet.age }} años</span>
+        </div>
+        <p class="pet-description">{{ pet.description || 'Sin descripción' }}</p>
+      </div>
+
+      <div class="pet-actions" *ngIf="isAdmin">
+        <button (click)="editPet(pet.id, $event)" class="btn-edit">✏️ Editar</button>
+        <button (click)="deletePet(pet.id, $event)" class="btn-delete">🗑️ Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && pets.length === 0" class="empty-state">
+    <p>😿 No se encontraron mascotas</p>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!isLoading && totalCount > 0" class="pagination">
+    <button (click)="previousPage()" [disabled]="currentPage === 1" class="btn-page">
+      ← Anterior
+    </button>
+    <span class="page-info">
+      Página {{ currentPage }} de {{ Math.ceil(totalCount / pageSize) }} 
+      ({{ totalCount }} total)
+    </span>
+    <button (click)="nextPage()" [disabled]="currentPage * pageSize >= totalCount" class="btn-page">
+      Siguiente →
+    </button>
+  </div>
+</div>

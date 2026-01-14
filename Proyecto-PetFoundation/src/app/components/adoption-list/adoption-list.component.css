@@ -1,0 +1,293 @@
+.adoption-list-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.filters {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.filter-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.filter-select,
+.filter-input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.btn-apply,
+.btn-clear {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-apply {
+  background: #667eea;
+  color: white;
+}
+
+.btn-clear {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.btn-apply:hover {
+  background: #5568d3;
+}
+
+.btn-clear:hover {
+  background: #e0e0e0;
+}
+
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.request-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.request-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s;
+}
+
+.request-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.request-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.request-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.pet-name {
+  margin: 0;
+  color: #667eea;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.pet-name:hover {
+  color: #5568d3;
+  text-decoration: underline;
+}
+
+.request-status {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: white;
+}
+
+.status-pending {
+  background: #f59e0b;
+}
+
+.status-approved {
+  background: #22c55e;
+}
+
+.status-rejected {
+  background: #ef4444;
+}
+
+.status-cancelled {
+  background: #6b7280;
+}
+
+.request-date small {
+  color: #999;
+}
+
+.request-body {
+  margin-bottom: 15px;
+}
+
+.info-row {
+  margin-bottom: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.info-row strong {
+  color: #666;
+  min-width: 140px;
+}
+
+.request-reason {
+  margin: 0;
+  color: #333;
+  line-height: 1.5;
+}
+
+.request-actions {
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.admin-actions,
+.user-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-approve,
+.btn-reject,
+.btn-cancel-request {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-approve {
+  background: #22c55e;
+  color: white;
+}
+
+.btn-reject {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-cancel-request {
+  background: #6b7280;
+  color: white;
+}
+
+.btn-approve:hover {
+  background: #16a34a;
+}
+
+.btn-reject:hover {
+  background: #dc2626;
+}
+
+.btn-cancel-request:hover {
+  background: #4b5563;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 18px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.btn-page {
+  padding: 10px 20px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-page:hover:not(:disabled) {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.btn-page:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-info {
+  color: #666;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .filter-row {
+    flex-direction: column;
+  }
+
+  .filter-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .request-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .info-row {
+    flex-direction: column;
+    gap: 5px;
+  }
+}

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { Subject } from 'rxjs';
+import { API_CONFIG } from '../config/api.config';
 
 @Injectable({
   providedIn: 'root'
@@ -17,12 +18,19 @@ export class SignalrService {
   constructor() { }
 
   // Iniciar conexión con SignalR
-  public startConnection(): void {
+  public startConnection(token?: string): void {
+    const options: signalR.IHttpConnectionOptions = {
+      skipNegotiation: true,
+      transport: signalR.HttpTransportType.WebSockets
+    };
+
+    // Agregar token de autenticación si está disponible
+    if (token) {
+      options.accessTokenFactory = () => token;
+    }
+
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl('http://localhost:5000/hubs/notifications', {
-        skipNegotiation: true,
-        transport: signalR.HttpTransportType.WebSockets
-      })
+      .withUrl(API_CONFIG.signalrHubUrl, options)
       .withAutomaticReconnect()
       .build();
 
@@ -44,14 +52,26 @@ export class SignalrService {
     });
 
     // Cuando hay una nueva mascota disponible
+    this.hubConnection.on('PetCreated', (petData: any) => {
+      console.log('🐾 Nueva mascota disponible (PetCreated):', petData);
+      this.newPetAvailable$.next(petData);
+    });
+
+    // También escuchar el evento antiguo por compatibilidad
     this.hubConnection.on('NewPetAvailable', (petData: any) => {
-      console.log('🐾 Nueva mascota disponible:', petData);
+      console.log('🐾 Nueva mascota disponible (NewPetAvailable):', petData);
       this.newPetAvailable$.next(petData);
     });
 
     // Cuando hay una nueva solicitud de adopción
+    this.hubConnection.on('AdoptionRequestCreated', (adoptionData: any) => {
+      console.log('📝 Nueva solicitud de adopción (AdoptionRequestCreated):', adoptionData);
+      this.newAdoptionRequest$.next(adoptionData);
+    });
+
+    // También escuchar el evento antiguo por compatibilidad
     this.hubConnection.on('NewAdoptionRequest', (adoptionData: any) => {
-      console.log('📝 Nueva solicitud de adopción:', adoptionData);
+      console.log('📝 Nueva solicitud de adopción (NewAdoptionRequest):', adoptionData);
       this.newAdoptionRequest$.next(adoptionData);
     });
 
