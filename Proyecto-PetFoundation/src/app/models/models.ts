@@ -108,7 +108,7 @@ export interface AdoptionRequest {
   petId: number;
   userId: number;
   status: string;
-  reason: string;
+  message: string;
   decisionById?: number;
   decisionDate?: Date;
   createdAt: Date;
@@ -120,7 +120,7 @@ export interface AdoptionRequest {
 
 export interface CreateAdoptionRequestRequest {
   petId: number;
-  reason: string;
+  message: string;
 }
 
 export interface PaginatedAdoptionRequests {

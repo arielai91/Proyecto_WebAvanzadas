@@ -15,9 +15,11 @@ import { Subscription } from 'rxjs';
 })
 export class NotificationsComponent implements OnInit, OnDestroy {
   notifications: Notification[] = [];
+  filteredNotifications: Notification[] = [];
   unreadCount = 0;
   isLoading = true;
-  
+  activeFilter: 'all' | 'unread' | 'NEW_PET' | 'ADOPTION_STATUS' | 'NEW_REQUEST' = 'all';
+
   private subscriptions: Subscription[] = [];
 
   constructor(
@@ -41,6 +43,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
       next: (response) => {
         this.notifications = response.items;
         this.unreadCount = this.notifications.filter(n => !n.isRead).length;
+        this.applyFilter();
         this.isLoading = false;
       },
       error: (error) => {
@@ -51,42 +54,42 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   }
 
   subscribeToSignalR(): void {
-    // Escuchar nuevas mascotas
-    const newPetSub = this.signalrService.newPetAvailable$.subscribe((petData) => {
-      console.log('🐾 Nueva mascota recibida en componente:', petData);
-      // Recargar las notificaciones desde el servidor para obtener la persistida
+    const newPetSub = this.signalrService.newPetAvailable$.subscribe(() => {
       this.loadNotifications();
     });
 
-    // Escuchar cambios de estado en adopciones
-    const statusChangeSub = this.signalrService.adoptionStatusChanged$.subscribe((statusData) => {
-      console.log('✅ Cambio de estado recibido en componente:', statusData);
-      // Recargar las notificaciones desde el servidor
+    const statusChangeSub = this.signalrService.adoptionStatusChanged$.subscribe(() => {
       this.loadNotifications();
     });
 
-    // Escuchar nuevas solicitudes (admin)
-    const newRequestSub = this.signalrService.newAdoptionRequest$.subscribe((adoptionData) => {
-      console.log('📋 Nueva solicitud recibida en componente:', adoptionData);
-      // Recargar las notificaciones desde el servidor
+    const newRequestSub = this.signalrService.newAdoptionRequest$.subscribe(() => {
       this.loadNotifications();
     });
 
     this.subscriptions.push(newPetSub, statusChangeSub, newRequestSub);
   }
 
-  addNotification(notification: Notification): void {
-    this.notifications.unshift(notification);
-    this.unreadCount++;
-    
-    // Mostrar notificación del navegador
-    this.showBrowserNotification(notification.title, notification.message);
+  setFilter(filter: 'all' | 'unread' | 'NEW_PET' | 'ADOPTION_STATUS' | 'NEW_REQUEST'): void {
+    this.activeFilter = filter;
+    this.applyFilter();
   }
 
-  showBrowserNotification(title: string, message: string): void {
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(title, { body: message, icon: '/assets/logo.png' });
+  applyFilter(): void {
+    switch (this.activeFilter) {
+      case 'all':
+        this.filteredNotifications = this.notifications;
+        break;
+      case 'unread':
+        this.filteredNotifications = this.notifications.filter(n => !n.isRead);
+        break;
+      default:
+        this.filteredNotifications = this.notifications.filter(n => n.type === this.activeFilter);
+        break;
     }
+  }
+
+  trackByNotification(index: number, notification: Notification): number {
+    return notification.id;
   }
 
   markAsRead(notification: Notification): void {
@@ -96,19 +99,20 @@ export class NotificationsComponent implements OnInit, OnDestroy {
       next: () => {
         notification.isRead = true;
         this.unreadCount--;
+        this.applyFilter();
       },
       error: (error) => {
-        console.error('Error marcando notificación:', error);
+        console.error('Error marcando notificacion:', error);
       }
     });
   }
 
   markAllAsRead(): void {
     this.notificationService.markAllAsRead().subscribe({
-      next: (response) => {
+      next: () => {
         this.notifications.forEach(n => n.isRead = true);
         this.unreadCount = 0;
-        console.log(`${response.updated} notificaciones marcadas como leídas`);
+        this.applyFilter();
       },
       error: (error) => {
         console.error('Error marcando todas:', error);
@@ -119,7 +123,6 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   handleNotificationClick(notification: Notification): void {
     this.markAsRead(notification);
 
-    // Navegar según el tipo de notificación
     if (notification.type === 'NEW_PET' && notification.data?.Pet?.id) {
       this.router.navigate(['/pets', notification.data.Pet.id]);
     } else if (notification.type === 'ADOPTION_STATUS' && notification.data?.AdoptionRequest?.id) {
@@ -136,5 +139,30 @@ export class NotificationsComponent implements OnInit, OnDestroy {
       case 'NEW_REQUEST': return '📋';
       default: return '🔔';
     }
+  }
+
+  getTypeLabel(type: string): string {
+    switch (type) {
+      case 'NEW_PET': return 'Nueva mascota';
+      case 'ADOPTION_STATUS': return 'Estado de solicitud';
+      case 'NEW_REQUEST': return 'Nueva solicitud';
+      default: return 'Notificacion';
+    }
+  }
+
+  getRelativeTime(date: Date): string {
+    const now = new Date();
+    const then = new Date(date);
+    const diffMs = now.getTime() - then.getTime();
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHour = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHour / 24);
+
+    if (diffSec < 60) return 'Justo ahora';
+    if (diffMin < 60) return `hace ${diffMin} min`;
+    if (diffHour < 24) return `hace ${diffHour}h`;
+    if (diffDay < 7) return `hace ${diffDay}d`;
+    return then.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
   }
 }

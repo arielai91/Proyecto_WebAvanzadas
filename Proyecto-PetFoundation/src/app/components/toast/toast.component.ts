@@ -19,8 +19,8 @@ export class ToastComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.subscription = this.toastService.toast$.subscribe(toast => {
       this.toasts.push(toast);
-      
-      // Auto-remover después del duration
+
+      // Auto-remover despues del duration
       if (toast.duration) {
         setTimeout(() => {
           this.remove(toast.id);
@@ -35,6 +35,10 @@ export class ToastComponent implements OnInit, OnDestroy {
 
   remove(id: string): void {
     this.toasts = this.toasts.filter(t => t.id !== id);
+  }
+
+  trackByToast(index: number, toast: ToastNotification): string {
+    return toast.id;
   }
 
   getIcon(type: ToastNotification['type']): string {

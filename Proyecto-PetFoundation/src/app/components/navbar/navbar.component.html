@@ -1,47 +1,124 @@
 <nav class="navbar">
   <div class="nav-container">
-    <div class="nav-brand">
+    <div class="nav-brand" routerLink="/">
       <span class="logo">🐾</span>
-      <h2 routerLink="/">Pet Foundation</h2>
+      <h2>Pet Foundation</h2>
     </div>
 
-    <button class="menu-toggle" (click)="toggleMenu()">
+    <button class="menu-toggle" [class.open]="menuOpen" (click)="toggleMenu()" aria-label="Toggle menu">
       <span></span>
       <span></span>
       <span></span>
     </button>
 
     <ul class="nav-menu" [class.active]="menuOpen">
-      <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Inicio</a></li>
-      <li><a routerLink="/pets" routerLinkActive="active">Mascotas</a></li>
-      
-      <li *ngIf="isAuthenticated">
-        <a routerLink="/adoption-requests" routerLinkActive="active">Solicitudes</a>
+      <li>
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMenu()">
+          Inicio
+        </a>
       </li>
-      
-      <li *ngIf="isAuthenticated" class="notifications-item">
-        <a routerLink="/notifications" routerLinkActive="active" class="notification-link">
-          🔔 Notificaciones
-          <span *ngIf="unreadCount > 0" class="badge">{{ unreadCount }}</span>
+      <li>
+        <a routerLink="/pets" routerLinkActive="active" (click)="closeMenu()">
+          Mascotas
         </a>
       </li>
 
+      <li *ngIf="isAuthenticated">
+        <a routerLink="/adoption-requests" routerLinkActive="active" (click)="closeMenu()">
+          Solicitudes
+        </a>
+      </li>
+
+      <!-- Notification bell with dropdown -->
+      <li *ngIf="isAuthenticated" class="notifications-item">
+        <button class="notification-bell" (click)="toggleNotificationPanel($event)" [class.has-unread]="unreadCount > 0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span class="bell-label">Notificaciones</span>
+          <span *ngIf="unreadCount > 0" class="badge" [@badgeBounce]>{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+        </button>
+
+        <!-- Notification dropdown panel -->
+        <div class="notification-dropdown" *ngIf="showNotificationPanel" (click)="$event.stopPropagation()">
+          <div class="dropdown-header">
+            <h4>Notificaciones</h4>
+            <button *ngIf="unreadCount > 0" class="btn-mark-read" (click)="markAllAsReadFromPanel()">
+              Marcar todo leido
+            </button>
+          </div>
+
+          <div class="dropdown-body" *ngIf="!isLoadingPreview">
+            <div *ngIf="previewNotifications.length === 0" class="dropdown-empty">
+              <span class="dropdown-empty-icon">🔕</span>
+              <p>Sin notificaciones nuevas</p>
+            </div>
+
+            <div
+              *ngFor="let notification of previewNotifications"
+              class="dropdown-notification"
+              [class.unread]="!notification.isRead"
+              (click)="handleDropdownNotificationClick(notification)"
+            >
+              <div class="dropdown-notification-icon">
+                {{ getNotificationIcon(notification.type) }}
+              </div>
+              <div class="dropdown-notification-content">
+                <span class="dropdown-notification-title">{{ notification.title }}</span>
+                <span class="dropdown-notification-message">{{ notification.message }}</span>
+                <span class="dropdown-notification-time">{{ getRelativeTime(notification.createdAt) }}</span>
+              </div>
+              <div class="dropdown-notification-dot" *ngIf="!notification.isRead"></div>
+            </div>
+          </div>
+
+          <div *ngIf="isLoadingPreview" class="dropdown-loading">
+            <div class="mini-spinner"></div>
+          </div>
+
+          <div class="dropdown-footer">
+            <a routerLink="/notifications" (click)="closeNotificationPanel(); closeMenu()">Ver todas las notificaciones</a>
+          </div>
+        </div>
+      </li>
+
+      <!-- User section -->
       <li *ngIf="isAuthenticated" class="user-menu">
+        <div class="user-avatar">{{ getUserInitials() }}</div>
         <span class="user-name">{{ userName }}</span>
-        <button class="btn-logout" (click)="logout()">Cerrar Sesión</button>
+        <button class="btn-logout" (click)="logout()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Salir
+        </button>
       </li>
 
       <li *ngIf="!isAuthenticated">
-        <button class="btn-primary" routerLink="/login">Iniciar Sesión</button>
+        <button class="btn-primary" routerLink="/login" (click)="closeMenu()">Iniciar Sesion</button>
       </li>
     </ul>
   </div>
 </nav>
 
+<!-- Overlay for mobile menu -->
+<div class="nav-overlay" *ngIf="menuOpen" (click)="closeMenu()"></div>
+
+<!-- Overlay for notification dropdown -->
+<div class="notification-overlay" *ngIf="showNotificationPanel" (click)="closeNotificationPanel()"></div>
+
 <!-- Banner para activar notificaciones -->
-<div class="notification-banner" *ngIf="showNotificationBanner && isAuthenticated">
+<div class="notification-banner" *ngIf="showNotificationBanner && isAuthenticated" [@slideDown]>
   <div class="banner-content">
-    <span class="banner-icon">🔔</span>
+    <div class="banner-icon-wrapper">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+      </svg>
+    </div>
     <div class="banner-text">
       <strong>Activa las notificaciones</strong>
       <p>Recibe alertas cuando haya nuevas mascotas o cambios en tus solicitudes</p>

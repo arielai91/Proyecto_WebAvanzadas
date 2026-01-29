@@ -1,17 +1,53 @@
 <div class="notifications-container">
   <div class="notifications-header">
-    <h1>🔔 Notificaciones</h1>
-    <button 
-      *ngIf="unreadCount > 0" 
-      (click)="markAllAsRead()" 
+    <div class="header-left">
+      <h1>Notificaciones</h1>
+      <span *ngIf="unreadCount > 0" class="unread-count">{{ unreadCount }} sin leer</span>
+    </div>
+    <button
+      *ngIf="unreadCount > 0"
+      (click)="markAllAsRead()"
       class="btn-mark-all"
     >
-      Marcar todas como leídas
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      Marcar todas como leidas
     </button>
   </div>
 
-  <div class="unread-badge" *ngIf="unreadCount > 0">
-    {{ unreadCount }} notificación{{ unreadCount !== 1 ? 'es' : '' }} sin leer
+  <!-- Filter tabs -->
+  <div class="filter-tabs">
+    <button
+      class="filter-tab"
+      [class.active]="activeFilter === 'all'"
+      (click)="setFilter('all')"
+    >
+      Todas
+      <span class="tab-count" *ngIf="notifications.length > 0">{{ notifications.length }}</span>
+    </button>
+    <button
+      class="filter-tab"
+      [class.active]="activeFilter === 'unread'"
+      (click)="setFilter('unread')"
+    >
+      Sin leer
+      <span class="tab-count" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+    </button>
+    <button
+      class="filter-tab"
+      [class.active]="activeFilter === 'NEW_PET'"
+      (click)="setFilter('NEW_PET')"
+    >
+      Mascotas
+    </button>
+    <button
+      class="filter-tab"
+      [class.active]="activeFilter === 'ADOPTION_STATUS'"
+      (click)="setFilter('ADOPTION_STATUS')"
+    >
+      Solicitudes
+    </button>
   </div>
 
   <!-- Loading -->
@@ -21,34 +57,48 @@
   </div>
 
   <!-- Notifications List -->
-  <div *ngIf="!isLoading && notifications.length > 0" class="notifications-list">
-    <div 
-      *ngFor="let notification of notifications" 
+  <div *ngIf="!isLoading && filteredNotifications.length > 0" class="notifications-list">
+    <div
+      *ngFor="let notification of filteredNotifications; trackBy: trackByNotification"
       class="notification-card"
       [class.unread]="!notification.isRead"
       (click)="handleNotificationClick(notification)"
     >
-      <div class="notification-icon">
+      <div class="notification-icon-wrapper" [ngClass]="'icon-' + notification.type.toLowerCase()">
         {{ getNotificationIcon(notification.type) }}
       </div>
 
       <div class="notification-content">
-        <h3>{{ notification.title }}</h3>
+        <div class="notification-top">
+          <h3>{{ notification.title }}</h3>
+          <span class="notification-time">{{ getRelativeTime(notification.createdAt) }}</span>
+        </div>
         <p>{{ notification.message }}</p>
-        <small class="notification-time">
-          {{ notification.createdAt | date:'medium' }}
-        </small>
+        <div class="notification-meta">
+          <span class="notification-type-badge" [ngClass]="'type-' + notification.type.toLowerCase()">
+            {{ getTypeLabel(notification.type) }}
+          </span>
+        </div>
       </div>
 
-      <div class="notification-indicator" *ngIf="!notification.isRead">
-        <span class="dot"></span>
+      <div class="notification-actions">
+        <div class="unread-dot" *ngIf="!notification.isRead"></div>
       </div>
     </div>
   </div>
 
   <!-- Empty State -->
-  <div *ngIf="!isLoading && notifications.length === 0" class="empty-state">
-    <div class="empty-icon">🔕</div>
-    <p>No tienes notificaciones</p>
+  <div *ngIf="!isLoading && filteredNotifications.length === 0" class="empty-state">
+    <div class="empty-illustration">
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        <line x1="1" y1="1" x2="23" y2="23"></line>
+      </svg>
+    </div>
+    <h3 *ngIf="activeFilter === 'all'">No tienes notificaciones</h3>
+    <h3 *ngIf="activeFilter === 'unread'">No tienes notificaciones sin leer</h3>
+    <h3 *ngIf="activeFilter !== 'all' && activeFilter !== 'unread'">No hay notificaciones de este tipo</h3>
+    <p>Las nuevas notificaciones apareceran aqui</p>
   </div>
 </div>

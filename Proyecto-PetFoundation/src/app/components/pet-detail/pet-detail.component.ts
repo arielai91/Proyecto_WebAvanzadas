@@ -75,7 +75,7 @@ export class PetDetailComponent implements OnInit {
     this.isAdopting = true;
     this.adoptionService.create({
       petId: this.pet.id,
-      reason: reason
+      message: reason
     }).subscribe({
       next: () => {
         this.isAdopting = false;
