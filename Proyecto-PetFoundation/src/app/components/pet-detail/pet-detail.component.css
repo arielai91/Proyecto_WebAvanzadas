@@ -185,6 +185,82 @@
   background: #e0e0e0;
 }
 
+.btn-qr-toggle {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  border: 2px solid #667eea;
+  background: white;
+  color: #667eea;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-qr-toggle svg {
+  flex-shrink: 0;
+}
+
+.btn-qr-toggle:hover {
+  background: #667eea;
+  color: white;
+}
+
+.qr-section {
+  margin-top: 24px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.qr-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  background: #f8f9ff;
+  border: 1px solid #e0e5ff;
+  border-radius: 12px;
+}
+
+.qr-card canvas {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.qr-label {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.btn-download-qr {
+  padding: 10px 24px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-download-qr:hover {
+  background: #5568d3;
+  transform: translateY(-1px);
+}
+
 .loading {
   text-align: center;
   padding: 100px 20px;

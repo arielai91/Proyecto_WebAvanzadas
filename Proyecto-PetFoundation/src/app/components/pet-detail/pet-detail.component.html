@@ -52,9 +52,9 @@
       </div>
 
       <div class="action-buttons">
-        <button 
-          *ngIf="isAuthenticated && !isAdmin && pet.status === 'Available'" 
-          (click)="openAdoptionModal()" 
+        <button
+          *ngIf="isAuthenticated && !isAdmin && pet.status === 'Available'"
+          (click)="openAdoptionModal()"
           class="btn-adopt"
           [disabled]="isAdopting"
         >
@@ -66,9 +66,33 @@
           ✏️ Editar Mascota
         </button>
 
+        <button *ngIf="isAdmin" (click)="toggleQrCode()" class="btn-qr-toggle">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="3" height="3"/>
+            <rect x="18" y="14" width="3" height="3"/>
+            <rect x="14" y="18" width="3" height="3"/>
+            <rect x="18" y="18" width="3" height="3"/>
+          </svg>
+          {{ showQrSection ? 'Ocultar QR' : 'Ver QR' }}
+        </button>
+
         <button *ngIf="!isAuthenticated" (click)="goBack()" class="btn-secondary">
           Inicia sesión para adoptar
         </button>
+      </div>
+
+      <!-- QR Code Section -->
+      <div class="qr-section" *ngIf="showQrSection && isAdmin">
+        <div class="qr-card">
+          <canvas #qrCanvas></canvas>
+          <p class="qr-label">ID: {{ pet.id }} — {{ pet.name }}</p>
+          <button class="btn-download-qr" (click)="downloadQrCode()">
+            Descargar QR
+          </button>
+        </div>
       </div>
     </div>
   </div>

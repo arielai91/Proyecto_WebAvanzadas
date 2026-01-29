@@ -5,11 +5,12 @@ import { Router } from '@angular/router';
 import { PetService } from '../../services/pet.service';
 import { AuthService } from '../../services/auth.service';
 import { Pet, PetFilters, PET_STATUSES, PET_SIZES, PET_SEXES } from '../../models/models';
+import { QrScannerComponent } from '../qr-scanner/qr-scanner.component';
 
 @Component({
   selector: 'app-pet-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, QrScannerComponent],
   templateUrl: './pet-list.component.html',
   styleUrl: './pet-list.component.css'
 })
@@ -21,6 +22,7 @@ export class PetListComponent implements OnInit {
   pageSize = 12;
   isLoading = false;
   isAdmin = false;
+  showQrScanner = false;
 
   filters: PetFilters = {
     page: 1,
@@ -94,6 +96,19 @@ export class PetListComponent implements OnInit {
 
   createPet(): void {
     this.router.navigate(['/pets/create']);
+  }
+
+  openQrScanner(): void {
+    this.showQrScanner = true;
+  }
+
+  closeQrScanner(): void {
+    this.showQrScanner = false;
+  }
+
+  onPetFoundByQr(petId: number): void {
+    this.showQrScanner = false;
+    this.router.navigate(['/pets', petId]);
   }
 
   editPet(petId: number, event: Event): void {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PetService } from '../../services/pet.service';
@@ -6,6 +6,7 @@ import { AdoptionRequestService } from '../../services/adoption-request.service'
 import { AuthService } from '../../services/auth.service';
 import { Pet } from '../../models/models';
 import { ModalComponent } from '../modal/modal.component';
+import * as QRCode from 'qrcode';
 
 @Component({
   selector: 'app-pet-detail',
@@ -15,12 +16,15 @@ import { ModalComponent } from '../modal/modal.component';
   styleUrl: './pet-detail.component.css'
 })
 export class PetDetailComponent implements OnInit {
+  @ViewChild('qrCanvas') qrCanvas!: ElementRef<HTMLCanvasElement>;
+
   pet: Pet | null = null;
   isLoading = true;
   isAuthenticated = false;
   isAdmin = false;
   isAdopting = false;
-  
+  showQrSection = false;
+
   // Modal state
   showAdoptionModal = false;
   showSuccessModal = false;
@@ -111,6 +115,32 @@ export class PetDetailComponent implements OnInit {
     if (this.pet) {
       this.router.navigate(['/pets', this.pet.id, 'edit']);
     }
+  }
+
+  toggleQrCode(): void {
+    this.showQrSection = !this.showQrSection;
+    if (this.showQrSection && this.pet) {
+      setTimeout(() => this.generateQrCode(), 0);
+    }
+  }
+
+  private generateQrCode(): void {
+    if (!this.pet || !this.qrCanvas) return;
+    const value = String(this.pet.id);
+    QRCode.toCanvas(this.qrCanvas.nativeElement, value, {
+      width: 200,
+      margin: 2,
+      color: { dark: '#333333', light: '#ffffff' }
+    });
+  }
+
+  downloadQrCode(): void {
+    if (!this.qrCanvas || !this.pet) return;
+    const canvas = this.qrCanvas.nativeElement;
+    const link = document.createElement('a');
+    link.download = `mascota-${this.pet.id}-qr.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
   }
 
   goBack(): void {

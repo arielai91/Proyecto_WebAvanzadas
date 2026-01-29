@@ -1,0 +1,76 @@
+<div class="scanner-overlay" (click)="onClose()">
+  <div class="scanner-container" (click)="$event.stopPropagation()">
+    <div class="scanner-header">
+      <h2>Escanear QR de Mascota</h2>
+      <button class="btn-close-scanner" (click)="onClose()">&#x2715;</button>
+    </div>
+
+    <!-- Camera Section -->
+    <div class="camera-section">
+      <div class="video-wrapper" *ngIf="cameraActive">
+        <video #video playsinline autoplay muted></video>
+        <canvas #canvas class="hidden-canvas"></canvas>
+        <div class="scan-frame">
+          <div class="corner top-left"></div>
+          <div class="corner top-right"></div>
+          <div class="corner bottom-left"></div>
+          <div class="corner bottom-right"></div>
+        </div>
+        <div class="scan-line"></div>
+      </div>
+
+      <div class="camera-placeholder" *ngIf="!cameraActive && !cameraError">
+        <div class="qr-icon">
+          <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="#667eea" stroke-width="1.5">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="3" height="3"/>
+            <rect x="18" y="14" width="3" height="3"/>
+            <rect x="14" y="18" width="3" height="3"/>
+            <rect x="18" y="18" width="3" height="3"/>
+          </svg>
+        </div>
+        <p>Presiona el botón para abrir la cámara y escanear el código QR de una mascota</p>
+        <button class="btn-start-camera" (click)="startCamera()">
+          Abrir Cámara
+        </button>
+      </div>
+
+      <div class="camera-error" *ngIf="cameraError">
+        <p>{{ cameraError }}</p>
+      </div>
+
+      <button *ngIf="cameraActive" class="btn-stop-camera" (click)="stopCamera()">
+        Detener Cámara
+      </button>
+    </div>
+
+    <!-- Divider -->
+    <div class="divider">
+      <span>o busca por ID</span>
+    </div>
+
+    <!-- Manual ID Input -->
+    <div class="manual-section">
+      <div class="manual-input-group">
+        <input
+          type="number"
+          [(ngModel)]="manualId"
+          placeholder="Ingresa el ID de la mascota"
+          class="manual-input"
+          (keydown.enter)="searchManualId()"
+          min="1"
+        />
+        <button class="btn-search" (click)="searchManualId()">
+          Buscar
+        </button>
+      </div>
+      <p class="manual-error" *ngIf="manualIdError">{{ manualIdError }}</p>
+    </div>
+
+    <p class="scanner-hint" *ngIf="!hasBarcodeDetector && !cameraActive">
+      Tu navegador no soporta escaneo nativo de QR. Usa la búsqueda manual por ID.
+    </p>
+  </div>
+</div>

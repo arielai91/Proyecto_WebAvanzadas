@@ -16,6 +16,37 @@
   margin: 0;
 }
 
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-qr {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.btn-qr svg {
+  flex-shrink: 0;
+}
+
+.btn-qr:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
+}
+
 .btn-create {
   padding: 12px 24px;
   background: #667eea;
@@ -304,5 +335,16 @@
     flex-direction: column;
     gap: 15px;
     align-items: flex-start;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .btn-qr, .btn-create {
+    flex: 1;
+    justify-content: center;
+    text-align: center;
   }
 }
