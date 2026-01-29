@@ -8,9 +8,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyHeader()
+        policy.SetIsOriginAllowed(_ => true)
+              .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowAnyOrigin();
+              .AllowCredentials();
     });
 });
 
@@ -21,6 +22,7 @@ builder.Services.AddHealthChecks();
 var app = builder.Build();
 
 app.UseCors("AllowAll");
+app.UseWebSockets();
 app.UseRouting();
 
 app.MapReverseProxy();
