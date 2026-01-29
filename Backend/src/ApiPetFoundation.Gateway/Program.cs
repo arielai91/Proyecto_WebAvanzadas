@@ -6,11 +6,12 @@ builder.WebHost.UseUrls($"https://localhost:{httpsPort}");
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.AllowAnyHeader()
+        policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
+              .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowAnyOrigin();
+              .AllowCredentials();
     });
 });
 
@@ -20,7 +21,7 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-app.UseCors("AllowAll");
+app.UseCors("AllowFrontend");
 app.UseRouting();
 
 app.MapReverseProxy();
