@@ -6,12 +6,13 @@ import { AdoptionRequestService } from '../../services/adoption-request.service'
 import { AuthService } from '../../services/auth.service';
 import { Pet } from '../../models/models';
 import { ModalComponent } from '../modal/modal.component';
+import { AdoptionFormModalComponent } from '../adoption-form-modal/adoption-form-modal.component';
 import * as QRCode from 'qrcode';
 
 @Component({
   selector: 'app-pet-detail',
   standalone: true,
-  imports: [CommonModule, ModalComponent],
+  imports: [CommonModule, ModalComponent, AdoptionFormModalComponent],
   templateUrl: './pet-detail.component.html',
   styleUrl: './pet-detail.component.css'
 })

@@ -1,8 +1,12 @@
 using Yarp.ReverseProxy;
 
 var builder = WebApplication.CreateBuilder(args);
-var httpsPort = builder.Configuration.GetValue<int?>("ASPNETCORE_HTTPS_PORT") ?? 5000;
-builder.WebHost.UseUrls($"https://localhost:{httpsPort}");
+// Configure URLs - use ASPNETCORE_URLS in Docker, HTTPS localhost in development
+if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_URLS")))
+{
+    var httpsPort = builder.Configuration.GetValue<int?>("ASPNETCORE_HTTPS_PORT") ?? 5000;
+    builder.WebHost.UseUrls($"https://localhost:{httpsPort}");
+}
 
 builder.Services.AddCors(options =>
 {

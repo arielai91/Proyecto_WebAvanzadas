@@ -6,8 +6,12 @@ using Microsoft.AspNetCore.Identity;
 using SoapCore;
 
 var builder = WebApplication.CreateBuilder(args);
-var httpsPort = builder.Configuration.GetValue<int?>("ASPNETCORE_HTTPS_PORT") ?? 5003;
-builder.WebHost.UseUrls($"https://localhost:{httpsPort}");
+// Configure URLs - use ASPNETCORE_URLS in Docker, HTTPS localhost in development
+if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_URLS")))
+{
+    var httpsPort = builder.Configuration.GetValue<int?>("ASPNETCORE_HTTPS_PORT") ?? 5003;
+    builder.WebHost.UseUrls($"https://localhost:{httpsPort}");
+}
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -36,7 +40,8 @@ using (var scope = app.Services.CreateScope())
     await IdentitySeed.SeedRoles(roleManager);
 }
 
-app.UseHttpsRedirection();
+if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_URLS")))
+    app.UseHttpsRedirection();
 app.UseRouting();
 app.UseCors("AllowGateway");
 

@@ -1,4 +1,4 @@
-.PHONY: help infra infra-up infra-down infra-logs backend-rest backend-soap backend-notifications backend-gateway backend frontend start-backend start-all stop-infra clean
+.PHONY: help infra infra-up infra-down infra-logs backend-rest backend-soap backend-notifications backend-gateway backend frontend start-backend start-all stop-infra clean deploy deploy-build deploy-down deploy-logs deploy-restart
 
 # Default target
 help:
@@ -24,6 +24,13 @@ help:
 	@echo ""
 	@echo "Combined Commands:"
 	@echo "  make start-all         - Start infrastructure + all backend services + frontend"
+	@echo ""
+	@echo "Docker Deployment Commands:"
+	@echo "  make deploy            - Build and start all services in containers"
+	@echo "  make deploy-build      - Rebuild all Docker images"
+	@echo "  make deploy-down       - Stop and remove all containers"
+	@echo "  make deploy-logs       - View logs from all containers"
+	@echo "  make deploy-restart    - Rebuild and restart all containers"
 	@echo ""
 	@echo "Utility Commands:"
 	@echo "  make clean             - Stop all services and clean up"
@@ -148,6 +155,41 @@ test-frontend:
 	@echo "🧪 Running frontend tests..."
 	cd Proyecto-PetFoundation && npm test
 	@echo "✅ Frontend tests complete"
+
+# ──────────────────────────────────────────────
+# Docker Deployment Commands (all services containerized)
+# ──────────────────────────────────────────────
+deploy:
+	@echo "Building and starting all services in containers..."
+	podman-compose up -d --build
+	@echo ""
+	@echo "All services started:"
+	@echo "   - Frontend:           http://localhost"
+	@echo "   - API Gateway:        http://localhost:5000"
+	@echo "   - REST API:           http://localhost:5001"
+	@echo "   - SOAP API:           http://localhost:5003"
+	@echo "   - Notifications API:  http://localhost:5004"
+	@echo "   - RabbitMQ UI:        http://localhost:15672 (guest/guest)"
+	@echo ""
+	@echo "View logs: make deploy-logs"
+
+deploy-build:
+	@echo "Rebuilding all Docker images..."
+	podman-compose build --no-cache
+
+deploy-down:
+	@echo "Stopping all containers..."
+	podman-compose down
+	@echo "All containers stopped"
+
+deploy-logs:
+	podman-compose logs -f
+
+deploy-restart:
+	@echo "Restarting all services..."
+	podman-compose down
+	podman-compose up -d --build
+	@echo "All services restarted"
 
 # Clean up
 clean:

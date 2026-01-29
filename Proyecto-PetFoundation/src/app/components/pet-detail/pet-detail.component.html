@@ -104,19 +104,14 @@
 </div>
 
 <!-- Modal para solicitud de adopción -->
-<app-modal
+<app-adoption-form-modal
   [isOpen]="showAdoptionModal"
-  title="Solicitud de Adopción"
-  [message]="'¿Por qué quieres adoptar a ' + (pet?.name || 'esta mascota') + '?'"
-  [showInput]="true"
-  inputLabel="Motivo de adopción *"
-  inputPlaceholder="Cuéntanos por qué quieres adoptarla..."
-  inputType="textarea"
-  confirmText="Enviar Solicitud"
+  [petName]="pet?.name || ''"
+  [petSpecies]="pet?.species || ''"
   [isLoading]="isAdopting"
   (confirm)="requestAdoption($event)"
   (cancel)="closeAdoptionModal()"
-></app-modal>
+></app-adoption-form-modal>
 
 <!-- Modal de éxito -->
 <app-modal

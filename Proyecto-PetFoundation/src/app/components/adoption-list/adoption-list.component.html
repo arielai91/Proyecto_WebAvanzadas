@@ -52,9 +52,15 @@
           <span>{{ request.user?.name || 'Usuario #' + request.userId }}</span>
         </div>
 
+        <div class="preference-tags" *ngIf="parsePreferences(request.message).length > 0">
+          <span class="pref-tag" *ngFor="let pref of parsePreferences(request.message)">
+            <strong>{{ pref.key }}:</strong> {{ pref.value }}
+          </span>
+        </div>
+
         <div class="info-row">
           <strong>Razón:</strong>
-          <p class="request-reason">{{ request.message }}</p>
+          <p class="request-reason">{{ parseReason(request.message) }}</p>
         </div>
 
         <div class="info-row" *ngIf="request.pet">

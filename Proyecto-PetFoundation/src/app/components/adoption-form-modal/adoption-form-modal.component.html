@@ -1,0 +1,121 @@
+<div class="adoption-modal-backdrop" *ngIf="isOpen" (click)="onBackdropClick($event)">
+  <div class="adoption-modal-container">
+    <!-- Header -->
+    <div class="adoption-modal-header">
+      <div class="header-content">
+        <span class="header-icon">&#x1F43E;</span>
+        <div>
+          <h3>Solicitud de Adopcion</h3>
+          <p class="header-subtitle" *ngIf="petName">Adoptando a <strong>{{ petName }}</strong></p>
+        </div>
+      </div>
+      <button class="close-btn" (click)="onCancel()" [disabled]="isLoading">&times;</button>
+    </div>
+
+    <!-- Body -->
+    <div class="adoption-modal-body">
+      <!-- Preferences Section -->
+      <div class="form-section">
+        <h4 class="section-title">Tus preferencias</h4>
+        <p class="section-description">Ayudanos a conocer mejor lo que buscas (opcional)</p>
+
+        <div class="form-grid">
+          <!-- Species -->
+          <div class="form-group">
+            <label for="species">Especie</label>
+            <select
+              id="species"
+              [(ngModel)]="selectedSpecies"
+              (ngModelChange)="onSpeciesChange()"
+              [disabled]="isLoading"
+            >
+              <option value="">Seleccionar...</option>
+              <option *ngFor="let species of speciesOptions" [value]="species">{{ species }}</option>
+            </select>
+          </div>
+
+          <!-- Breed -->
+          <div class="form-group">
+            <label for="breed">Raza</label>
+            <select
+              *ngIf="!showCustomBreed && selectedSpecies && selectedSpecies !== 'Otro'"
+              id="breed"
+              [(ngModel)]="selectedBreed"
+              [disabled]="isLoading || !selectedSpecies"
+            >
+              <option value="">Seleccionar...</option>
+              <option *ngFor="let breed of availableBreeds" [value]="breed">{{ breed }}</option>
+            </select>
+            <input
+              *ngIf="showCustomBreed || !selectedSpecies || selectedSpecies === 'Otro'"
+              type="text"
+              id="breed"
+              [(ngModel)]="customBreed"
+              placeholder="Escribe la raza..."
+              [disabled]="isLoading || (!selectedSpecies && !showCustomBreed)"
+            />
+          </div>
+
+          <!-- Color -->
+          <div class="form-group">
+            <label for="color">Color preferido</label>
+            <select
+              id="color"
+              [(ngModel)]="selectedColor"
+              [disabled]="isLoading"
+            >
+              <option value="">Seleccionar...</option>
+              <option *ngFor="let color of colorOptions" [value]="color">{{ color }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="form-divider"></div>
+
+      <!-- Reason Section -->
+      <div class="form-section">
+        <h4 class="section-title">Motivo de adopcion *</h4>
+        <p class="section-description">Cuentanos por que quieres adoptar a {{ petName || 'esta mascota' }}</p>
+
+        <div class="form-group">
+          <textarea
+            id="reason"
+            [(ngModel)]="reason"
+            placeholder="Ej: Tengo un hogar amplio con jardin y experiencia cuidando mascotas..."
+            rows="4"
+            [disabled]="isLoading"
+            [class.input-error]="submitted && !isReasonValid"
+          ></textarea>
+          <div class="field-hint" [class.hint-error]="submitted && !isReasonValid">
+            <span *ngIf="reason.trim().length < 10">Minimo 10 caracteres ({{ reason.trim().length }}/10)</span>
+            <span *ngIf="reason.trim().length >= 10">{{ reason.trim().length }} caracteres</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="adoption-modal-footer">
+      <button
+        class="btn-modal-cancel"
+        (click)="onCancel()"
+        [disabled]="isLoading"
+      >
+        Cancelar
+      </button>
+      <button
+        class="btn-modal-submit"
+        (click)="onSubmit()"
+        [disabled]="isLoading || (submitted && !canSubmit)"
+      >
+        <span *ngIf="!isLoading">Enviar Solicitud</span>
+        <span *ngIf="isLoading" class="loading-text">
+          <span class="btn-spinner"></span>
+          Enviando...
+        </span>
+      </button>
+    </div>
+  </div>
+</div>

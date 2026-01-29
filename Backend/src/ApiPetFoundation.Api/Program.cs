@@ -13,15 +13,18 @@ using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure URLs - HTTPS only (Gateway uses port 5000)
-var httpsPort = builder.Configuration.GetValue<int?>("ASPNETCORE_HTTPS_PORT") ?? 5001;
-builder.WebHost.ConfigureKestrel(options =>
+// Configure URLs - use ASPNETCORE_URLS in Docker, HTTPS localhost in development
+if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_URLS")))
 {
-    options.ListenLocalhost(httpsPort, listenOptions =>
+    var httpsPort = builder.Configuration.GetValue<int?>("ASPNETCORE_HTTPS_PORT") ?? 5001;
+    builder.WebHost.ConfigureKestrel(options =>
     {
-        listenOptions.UseHttps();
+        options.ListenLocalhost(httpsPort, listenOptions =>
+        {
+            listenOptions.UseHttps();
+        });
     });
-});
+}
 
 
 builder.Services.AddApplication();

@@ -135,6 +135,25 @@ export class AdoptionListComponent implements OnInit {
     }
   }
 
+  parsePreferences(message: string): { key: string; value: string }[] {
+    if (!message) return [];
+    const match = message.match(/^Preferencias - (.+?)(\n|$)/);
+    if (!match) return [];
+    return match[1].split(' | ').map(part => {
+      const [key, ...rest] = part.split(': ');
+      return { key: key.trim(), value: rest.join(': ').trim() };
+    }).filter(p => p.key && p.value);
+  }
+
+  parseReason(message: string): string {
+    if (!message) return '';
+    const parts = message.split('\n\n');
+    if (parts.length > 1 && message.startsWith('Preferencias - ')) {
+      return parts.slice(1).join('\n\n');
+    }
+    return message;
+  }
+
   getStatusClass(status: string): string {
     switch (status) {
       case ADOPTION_STATUSES.PENDING: return 'status-pending';

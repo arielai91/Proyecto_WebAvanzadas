@@ -175,6 +175,31 @@ h1 {
   min-width: 140px;
 }
 
+.preference-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.pref-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  background: #f0eeff;
+  color: #4b3f8f;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.pref-tag strong {
+  color: #667eea;
+  min-width: auto;
+  font-size: 12px;
+}
+
 .request-reason {
   margin: 0;
   color: #333;

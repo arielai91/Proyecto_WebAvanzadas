@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.angular/
+.vscode/
+.git
+.gitignore
+*.md
+karma.conf.js
+.editorconfig
