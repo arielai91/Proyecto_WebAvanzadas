@@ -161,7 +161,7 @@ services:
       ReverseProxy__Clusters__notifications-cluster__Destinations__notifications1__Address: http://notifications-api:5004/
       ReverseProxy__Clusters__notifications-cluster__HttpClient__DangerousAcceptAnyServerCertificate: "false"
     ports:
-      - "5000:5000"
+      - "5050:5000"
     depends_on:
       rest-api:
         condition: service_healthy
@@ -188,7 +188,7 @@ services:
       target: production
     container_name: petfoundation-frontend
     ports:
-      - "80:80"
+      - "8080:80"
     depends_on:
       api-gateway:
         condition: service_healthy
